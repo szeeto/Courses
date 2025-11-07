@@ -1,0 +1,404 @@
+*{
+    font-family: 'poppins', sans-serif;
+}
+
+/* Style Navbar */
+:root {
+  --primary-color: #f6f8fd;
+  --secondary-color: #dc3545;
+  --color-text: #231942;
+  --navbar-color: #ffffff;
+  --navbar-color-text: #000000;
+}
+
+.navbar{
+    position: fixed;
+    padding: 15px 0 15px 0;
+    width: 100%;
+    transition: all 0.2s ease;
+    -webkit-transition: all 0.2s ease;
+    -moz-transition: all 0.2s ease;
+    -ms-transition: all 0.2s ease;
+    -o-transition: all 0.2s ease;
+    z-index: 9999;
+}
+.navbar.color-active{
+    background-color:var(--navbar-color);
+    padding: 20px 0 20px 0;
+    border-bottom: 2px solid  #dc35469c;
+}
+
+.navbar .nav-link a{
+    padding: 5px 10px 5px 10px;
+    text-decoration: none;
+    font-weight: 500;
+    color: var(--navbar-color-text);
+}
+
+.navbar .nav-link a:hover{
+    color: var(--secondary-color);
+}
+.navbar .nav-link a.active{
+    color: var(--primary-color);
+    background: var(--secondary-color);
+    border-radius: 2px;
+}
+.navbar .nav-link a.active:hover{
+    color:var(--navbar-color);
+;
+}
+
+/* Style button links */
+.navbar button a {
+    text-decoration: none;
+    color:var(--secondary-color);
+}
+.navbar button a:hover{
+    color:var(--primary-color);;
+}
+/* Style navbar end */
+
+/* Style Homepage header */
+.homepages header{
+    background: #c6ffdd; /* fallback for old browsers */
+    background: -webkit-linear-gradient(to left, #f7797d, #fbd786, #c6ffdd); /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to left, #f7797d, #fbd786, #c6ffdd); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+}
+
+.homepages .header-box h1{
+    font-size: 3.2rem;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.homepages .header-box h1 span{
+    font-weight: 700;
+}
+.homepages .header-box p{
+    line-height: 2;
+    color: var(--color-text);
+    font-weight: 500;
+}
+
+.homepages .header-box img{
+    width: 100%;
+}
+@media screen and (max-width: 992px) {
+    .homepages .header-box{
+        padding-top: 8rem;
+    }
+    .homepages .header-box img{
+        width: 400px;
+        display: block;
+        margin-inline:auto;
+    }
+
+}
+
+@media screen and (max-width:575px){
+    .homepages .header-box h1{
+        font-size: 3rem;
+    }
+
+}
+
+@media screen and (max-width:475px){
+    .homepages .header-box h1{
+        font-size: 2.4rem;
+    }   
+
+    .homepages .header-box p{
+        font-size: 14px;
+    }
+
+    .homepages .header-box img{
+        width: 300px;
+    }
+}
+@media screen and (max-width:375px) {
+    .homepages .header-box h1{
+        font-size: 2rem;
+    }
+    .homepages .header-box p{
+        font-size: 12px;
+    }
+}
+
+/* Style Homepage end */
+
+/* Style HomePage Kelas */
+.homepages .kelas{
+    background: var(--primary-color);
+    padding-bottom:100px;
+}
+.homepages .kelas .row:nth-child(1){
+    padding-top: 150px;
+    padding-bottom: 100px;
+}
+.homepages .kelas .row:nth-child(1) h1,
+.homepages .kelas .row:nth-child(1) p{
+    color:var(--color-text)
+}
+
+.homepages .kelas .row:nth-child(2){
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap:15px;
+    padding-inline:10px;
+}
+.homepages .kelas .row:nth-child(2) .col{
+    background-color: #ffffff;
+    padding: 0;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.homepages .kelas .row:nth-child(2) .col img{
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.homepages .kelas .row:nth-child(2) .col .star-price{
+    padding: 15px;
+}
+
+.homepages .kelas .row:nth-child(2) .col .star{
+    color: #ffc107;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+.homepages .kelas .row:nth-child(2) .col h5{
+    color: var(--color-text);
+    font-weight: 600;
+    margin: 10px 0;
+    font-size: 18px;
+}
+
+.homepages .kelas .row:nth-child(2) .col .price{
+    color: #0d6efd;
+    font-weight: 600;
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.homepages .kelas .row:nth-child(2) .col .btn-beli{
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 5px;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.homepages .kelas .row:nth-child(2) .col .btn-beli:hover {
+    opacity: 0.9;
+    transform: scale(0.98);
+}
+.homepages .kelas .row:nth-child(3){
+    padding-top: 70px;
+}
+/* end HomePage Kelas */
+
+/* Style Homepage Testimonial */
+.homepages .testimonial{
+    background:var(--primary-color);
+}
+.homepages .testimonial h1{
+    color: var(--color-text);
+}
+
+.homepages .testimonial .swiper {
+  width: 100%;
+  height: 100%;
+  padding-bottom: 50px;
+}
+
+.homepages .testimonial .swiper-slide {
+  text-align: left;
+  font-size: 18px;
+  background: #fff;
+  padding: 20px;
+
+  /* Center slide text vertically */
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  cursor:grab;
+}
+
+.homepages .testimonial .swiper-slide:active{
+    cursor:grabbing;
+}
+
+.homepages .testimonial .swiper-slide .desc{
+    color: var(--color-text);
+    font-weight: 200;
+    margin-bottom: 20px;
+    line-height: 2;
+}
+.homepages .testimonial .swiper-slide .people{
+    display: flex;
+    align-items: center;
+    width: 100%;
+    column-gap: 10px;
+}
+
+.homepages .testimonial .swiper-slide .people h5,
+.homepages .testimonial .swiper-slide .people p {
+  color: var(--color-text);
+}
+
+.homepages .testimonial .swiper-slide .people h5{
+    font-weight: 600;   
+}
+.homepages .testimonial .swiper-slide .people p{
+  opacity: 50%;
+}
+
+.homepages .testimonial .swiper-slide .people img{
+    border-radius: 100%;
+    width: 80px;
+}
+
+@media screen and (max-width: 768px){
+    .homepages .testimonial .swiper-slide .people{
+        justify-content: center;
+    }
+    .homepages .testimonial .swiper{
+        padding-inline: 10px;
+    }
+}
+
+/* SemuaKelas Style */
+.kelas-page .kelas{
+    background: var(--primary-color);
+    padding-bottom:100px;
+}
+.kelas-page .kelas .row:nth-child(1){
+    padding-top: 120px;
+    padding-bottom: 100px;
+}
+
+/* Style Testimonial */
+
+.testimonial-page .testimonial{
+    background-color: var(--primary-color);
+    padding-top: 120px;
+    padding-bottom: 100px;
+}
+.testimonial-page .testimonial .row:nth-child(1) h1{
+    color: var(--color-text);
+}
+.testimonial-page .testimonial .row:nth-child(1) p{
+  color: var(--color-text);
+}
+/* Style Testimonial */
+
+/* Kelas Page Styles */
+.kelas-page .kelas-card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    height: 100%;
+}
+
+.kelas-page .kelas-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.kelas-page .kelas-card .star i {
+    color: #ffc107;
+    font-size: 16px;
+}
+
+.kelas-page .kelas-card h5 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-text);
+    min-height: 52px;
+}
+
+.kelas-page .kelas-card .btn {
+    padding: 8px 20px;
+    font-weight: 500;
+}
+
+/* STYLE FAQ */
+.faq{
+    padding-top:100px;
+    padding-bottom: 100px;
+    background-color: var(--primary-color);
+}
+.faq h2{
+    color: var(--color-text);
+}
+.faq .accordion .accordion-button{
+    color: var(--color-text);
+    font-weight: bold;
+    background-color: #ffffff;
+    line-height:1.5;
+}
+.faq .accordion .accordion-body{
+    color: #ffffff;
+
+/* FOOTER */
+.footer{
+    width: 100%;
+    min-height: 60vh; 
+}
+
+.footer .row:nth-child(1) h3{
+    color: var(--color-text);
+}
+
+.footer .row:nth-child(1) .col:nth-child(1) .desc{
+    color: var(--color-text);
+    line-height: 2;
+    font-size: 14px;
+    
+}
+.footer .no a,
+.footer .mail a{
+    display: flex;
+    align-items: center; 
+    color:black;
+    column-gap: 5px;
+    text-decoration: none;
+}
+.footer .no a:hover,
+.footer .mail a:hover{
+    color: var(--secondary-color);
+}
+.footer .row:nth-child(1) .col:nth-child(2){
+    gap: 10px;
+}
+
+.footer .row:nth-child(1) .col:nth-child(2) a{
+    color: black;
+    text-decoration: none;
+    font-size: 14px;
+}
+.footer .row:nth-child(1) .col:nth-child(2) a{
+    display: flex
+}
+.footer .row:nth-child(1) .col:nth-child(2) a:hover{
+    color: var(--secondary-color);
+}
+.footer .subscribes{
+    display: flex;
+    align-items: center;
+    gap:2px;
+}
+}
+.footer .subscribes input{
+    padding: 5px;
+    height: 38px;
+    width: 200px;
+}
