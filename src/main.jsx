@@ -5,7 +5,7 @@ import { BrowserRouter } from 'react-router-dom'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './css/main.css'
-import ScrollToTop from './components/scroolToTop.jsx'
+import ScrollToTop from './components/ScrollToTop.jsx'
 import 'animate.css';
 
 createRoot(document.getElementById('root')).render(
