@@ -28,7 +28,7 @@ const FooterComponents = () => {
             <Link to='/kelas'>Kelas</Link>
             <Link to='/testimoni'>Testimonial</Link>
             <Link to='/faq'>FAQ</Link>
-            <Link to='/syarat-ketentuan'>Syarat & Ketentuan</Link>
+            <Link to='/syaratketen'>Syarat & Ketentuan</Link>
           </Col>
           <Col lg="4" className='mt-lg-0 mt-5'>
             <h5 className='fw-bold'>Subscribe Untuk Info Menarik</h5>

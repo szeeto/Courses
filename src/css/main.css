@@ -11,16 +11,26 @@
   --navbar-color-text: #000000;
 }
 
+/* Navbar Animation */
+@keyframes FadeInDown {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .navbar{
     position: fixed;
     padding: 15px 0 15px 0;
     width: 100%;
-    transition: all 0.2s ease;
-    -webkit-transition: all 0.2s ease;
-    -moz-transition: all 0.2s ease;
-    -ms-transition: all 0.2s ease;
-    -o-transition: all 0.2s ease;
+    transition: all 0.3s ease;
     z-index: 9999;
+    animation: FadeInDown 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform, opacity;
 }
 .navbar.color-active{
     background-color:var(--navbar-color);
@@ -82,6 +92,26 @@
 
 .homepages .header-box img{
     width: 100%;
+    animation: fadeInUp 1s ease-out ;
+    will-change: transform, opacity;
+    - --animate-delay: 0.6s;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Fallback page animation when Animate.css not available */
+.page-animate{
+    animation: fadeInUp 0.9s ease-out both;
+    will-change: transform, opacity;
 }
 @media screen and (max-width: 992px) {
     .homepages .header-box{
@@ -287,7 +317,7 @@
 
 .testimonial-page .testimonial{
     background-color: var(--primary-color);
-    padding-top: 120px;
+    padding-top: 150px;
     padding-bottom: 100px;
 }
 .testimonial-page .testimonial .row:nth-child(1) h1{
@@ -296,7 +326,51 @@
 .testimonial-page .testimonial .row:nth-child(1) p{
   color: var(--color-text);
 }
+
+.testimonial-page .testimonial .row:last-child(1){
+    padding-bottom: 100px;
+}
+
+.testimonial-page .testimonial  .desc{
+    color: var(--color-text);
+    font-weight: 200;
+    margin-bottom: 20px;
+    line-height: 2;
+}
+.testimonial-page .testimonial  .people{
+    display: flex;
+    align-items: center;
+    width: 100%;
+    column-gap: 10px;
+}
+
+.testimonial-page .testimonial  .people h5,
+.testimonial-page .testimonial .people p {
+  color: var(--color-text);
+}
+
+.testimonial-page .testimonial .people h5{
+    font-weight: 600;   
+}
+.testimonial-page .testimonial  .people p{
+  opacity: 50%;
+}
+
+.testimonial-page .testimonial  .people img{
+    border-radius: 100%;
+    width: 80px;
+}
 /* Style Testimonial */
+
+/* SYARAT KETENTUAN PAGE */
+.syarat-ketentuan-page .syarat-ketentuan{
+    padding-top: 150px;
+    color: var(--color-text);
+}
+.syarat-ketentuan-page .syarat-ketentuan p{
+    line-height: 2;
+}
+/* SYARAT KETENTUAN PAGE */
 
 /* Kelas Page Styles */
 .kelas-page .kelas-card {
@@ -346,59 +420,114 @@
     line-height:1.5;
 }
 .faq .accordion .accordion-body{
-    color: #ffffff;
+    color: var(--color-text);
+    background-color: #ffffff;
+    line-height: 1.6;
+}
 
 /* FOOTER */
 .footer{
     width: 100%;
-    min-height: 60vh; 
+    min-height: 60vh;
+    background-color: var(--primary-color);
+    padding: 80px 0 20px;
 }
 
 .footer .row:nth-child(1) h3{
     color: var(--color-text);
+    margin-bottom: 20px;
 }
 
 .footer .row:nth-child(1) .col:nth-child(1) .desc{
     color: var(--color-text);
-    line-height: 2;
+    line-height: 1.8;
     font-size: 14px;
-    
+    opacity: 0.8;
 }
+
 .footer .no a,
 .footer .mail a{
     display: flex;
     align-items: center; 
-    color:black;
-    column-gap: 5px;
+    color: var(--color-text);
+    column-gap: 10px;
     text-decoration: none;
+    font-size: 14px;
+    transition: all 0.3s ease;
 }
+
 .footer .no a:hover,
 .footer .mail a:hover{
     color: var(--secondary-color);
+    transform: translateX(5px);
 }
+
 .footer .row:nth-child(1) .col:nth-child(2){
-    gap: 10px;
+    gap: 15px;
 }
 
 .footer .row:nth-child(1) .col:nth-child(2) a{
-    color: black;
+    color: var(--color-text);
     text-decoration: none;
     font-size: 14px;
+    transition: all 0.3s ease;
+    display: flex;
+    margin-bottom: 8px;
 }
-.footer .row:nth-child(1) .col:nth-child(2) a{
-    display: flex
-}
+
 .footer .row:nth-child(1) .col:nth-child(2) a:hover{
     color: var(--secondary-color);
+    transform: translateX(5px);
 }
+
 .footer .subscribes{
     display: flex;
-    align-items: center;
-    gap:2px;
+    align-items: stretch;
+    gap: 0;
+    margin-top: 15px;
 }
-}
+
 .footer .subscribes input{
-    padding: 5px;
-    height: 38px;
-    width: 200px;
+    padding: 10px 15px;
+    height: 42px;
+    width: 100%;
+    max-width: 300px;
+    border: 1px solid #ddd;
+    border-radius: 4px 0 0 4px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.footer .subscribes input:focus {
+    border-color: var(--secondary-color);
+}
+
+.footer .social {
+    display: flex;
+    gap: 15px;
+}
+
+.footer .social i {
+    font-size: 20px;
+    color: var(--color-text);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.footer .social i:hover {
+    color: var(--secondary-color);
+    transform: translateY(-3px);
+}
+
+.footer .row:last-child {
+    margin-top: 50px;
+    border-top: 1px solid rgba(0,0,0,0.1);
+    padding-top: 20px;
+}
+
+.footer .row:last-child p {
+    color: var(--color-text);
+    opacity: 0.8;
+    font-size: 14px;
+    margin: 0;
 }

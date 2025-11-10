@@ -14,18 +14,22 @@ const HomePage = () => {
   const navigate = useNavigate()
 
   return (
-    <div className="homepages">
+  <div className="homepages animate__animated animate__fadeInUp">
       <header className="w-100 min-vh-100 d-flex align-items-center">
         <Container>
           <Row className='header-box d-flex align-items-center pt-lg-5'>
             <Col lg='6'>
-              <h1 className='mb-4 '>Temuka <br /> <span>Bakat Kreatif-mu</span> <br /> Bersama Kami!</h1>
+              <h1 className='mb-4 animate__animated animate__fadeInUp animate__delay-1s'>Temuka <br /> <span>Bakat Kreatif-mu</span> <br /> Bersama Kami!</h1>
               <p className='mb-4'>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque est rem similique. Placeat, praesentium omnis?</p>
-              <button className='btn btn-danger btn-lg rounded-1 me-2 mb-xs-0 mb-2'>Lihat Kelas</button>
+              <button className='btn btn-danger btn-lg rounded-1 me-2 mb-xs-0 mb-2' onClick={() => navigate("kelas")}>Lihat Kelas</button>
               <button className='btn btn-outline-danger btn-lg rounded-1'>Lihat Promo</button>
             </Col>
-            <Col lg='6' >
-              <img src={HeroImage} alt="HeroImg" />
+            <Col lg='6' className="position-relative">
+              <img 
+                src={HeroImage} 
+                alt="HeroImg" 
+                className='animate__animated animate__fadeInUp'
+              />
             </Col>
           </Row>
         </Container>

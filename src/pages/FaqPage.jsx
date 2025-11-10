@@ -2,7 +2,7 @@ import FaqComponents from '../components/FaqComponents'
 
 const FaqPage = () => {
   return (
-    <div>
+  <div className="animate__animated animate__fadeIn">
       <FaqComponents />
     </div>
   )
