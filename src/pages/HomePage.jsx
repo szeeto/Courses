@@ -14,7 +14,7 @@ const HomePage = () => {
   const navigate = useNavigate()
 
   return (
-  <div className="homepages animate__animated animate__fadeInUp">
+  <div className="homepages page-root animate__animated animate__fadeInUp">
       <header className="w-100 min-vh-100 d-flex align-items-center">
         <Container>
           <Row className='header-box d-flex align-items-center pt-lg-5'>

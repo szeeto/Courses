@@ -2,7 +2,7 @@ import {Container, Row, Col} from 'react-bootstrap'
 import FaqComponents from '../components/FaqComponents'
 const SyaratKetenPage = () => {
   return (
-  <div className='syarat-ketentuan-page animate__animated animate__fadeInUp'>
+    <div className='syarat-ketentuan-page page-root animate__animated animate__fadeInUp'>
      <div className="syarat-ketentuan min-vh-100">
       <Container>
         <Row>

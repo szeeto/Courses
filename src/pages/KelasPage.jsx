@@ -3,7 +3,7 @@ import { semuaKelas } from '../data/index'
 import FaqComponents from '../components/FaqComponents'
 const Kelas = () => {
   return (
-  <div className="kelas-page animate__animated animate__fadeInUp">
+  <div className="kelas-page page-root animate__animated animate__fadeInUp">
       <div className='kelas min-vh-100'>
         <Container>
           <Row>

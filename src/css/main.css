@@ -266,8 +266,6 @@
   font-size: 18px;
   background: #fff;
   padding: 20px;
-
-  /* Center slide text vertically */
   display: flex;
   justify-content: center;
   flex-direction: column;
@@ -332,14 +330,14 @@
 
 .testimonial-page .testimonial{
     background-color: var(--primary-color);
-    padding-top: 150px;
-    padding-bottom: 100px;
+    padding-top: 120px;
 }
 .testimonial-page .testimonial .row:nth-child(1) h1{
     color: var(--color-text);
 }
 .testimonial-page .testimonial .row:nth-child(1) p{
   color: var(--color-text);
+  margin-bottom: 60px;
 }
 
 .testimonial-page .testimonial .row:last-child(1){
@@ -379,7 +377,7 @@
 
 /* SYARAT KETENTUAN PAGE */
 .syarat-ketentuan-page .syarat-ketentuan{
-    padding-top: 150px;
+    padding-top: 120px;
     color: var(--color-text);
 }
 .syarat-ketentuan-page .syarat-ketentuan p{
@@ -421,7 +419,7 @@
 
 /* STYLE FAQ */
 .faq{
-    padding-top:100px;
+    padding-top:120px;
     padding-bottom: 100px;
     background-color: var(--primary-color);
 }

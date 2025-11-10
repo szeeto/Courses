@@ -4,7 +4,7 @@ import FaqComponents from '../components/FaqComponents'
 
 export default function TestimoniPage() {
   return (
-  <div className="animate__animated animate__fadeInUp">
+    <div className="page-root animate__animated animate__fadeInUp">
       <div className="testimonial-page">
         <div className="testimonial">
           <Container>
