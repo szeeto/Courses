@@ -15,18 +15,21 @@ export default function TestimoniPage() {
               </Col>
             </Row>
             <Row className="row-cols-lg-3 row-cols-1">
-              {testimonial.map((data) => (
-                <Col key={data.id} className="mb-5">
-                  <p className="desc shadow-sm">{data.desc}</p>
-                  <div className="people">
-                    <img src={data.image} alt={data.name} />
-                    <div>
-                      <h5 className="mb-1">{data.name}</h5>
-                      <p className="fw-bold m-0">{data.skill}</p>
+              {testimonial.map((data, idx) => {
+                const delay = `${Math.min(idx, 8) * 0.08}s`;
+                return (
+                  <Col key={data.id} className="mb-5 animate__animated animate__fadeInUp" style={{ animationDelay: delay }}>
+                    <p className="desc shadow-sm">{data.desc}</p>
+                    <div className="people">
+                      <img src={data.image} alt={data.name} />
+                      <div>
+                        <h5 className="mb-1">{data.name}</h5>
+                        <p className="fw-bold m-0">{data.skill}</p>
+                      </div>
                     </div>
-                  </div>
-                </Col>
-              ))}
+                  </Col>
+                )
+              })}
             </Row>
           </Container>
         </div>

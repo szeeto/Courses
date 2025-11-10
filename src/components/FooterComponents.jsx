@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const FooterComponents = () => {
   return (
-    <div className='footer py-5'>
+    <div className='footer py-5 animate__animated animate__fadeInUp' style={{ animationDelay: '0.3s' }}>
       <Container>
         <Row className='d-flex justify-content-between'>
           <Col lg="5">

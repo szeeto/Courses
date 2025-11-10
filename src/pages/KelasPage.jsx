@@ -13,10 +13,11 @@ const Kelas = () => {
             </Col>
           </Row>
           <Row className='row-cols-lg-3 row-cols-md-2 row-cols-1 g-4'>
-            {semuaKelas.map((kelas) => {
+            {semuaKelas.map((kelas, idx) => {
+              const delay = `${Math.min(idx, 8) * 0.08}s`;
               return (
                 <Col key={kelas.id}>
-                  <div className='kelas-card'>
+                  <div className='kelas-card animate__animated animate__fadeInUp' style={{ animationDelay: delay }}>
                     <img src={kelas.image} alt="unsplash.com" className='mb-4' />
                     <div className='star mb-2 px-3'>
                       <i className={kelas.star1}></i>

@@ -94,7 +94,6 @@
     width: 100%;
     animation: fadeInUp 1s ease-out ;
     will-change: transform, opacity;
-    - --animate-delay: 0.6s;
 }
 
 @keyframes fadeInUp {
@@ -112,6 +111,22 @@
 .page-animate{
     animation: fadeInUp 0.9s ease-out both;
     will-change: transform, opacity;
+}
+
+/* Respect user preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .animate__animated,
+    .page-animate,
+    .kelas-card,
+    .footer,
+    .homepages .header-box img,
+    .homepages .header-box h1,
+    .homepages .header-box p,
+    .testimonial-page .testimonial .desc,
+    .faq .accordion .accordion-item {
+        animation: none !important;
+        transition: none !important;
+    }
 }
 @media screen and (max-width: 992px) {
     .homepages .header-box{
