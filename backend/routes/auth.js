@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import jwt from 'jsonwebtoken'
 import { OAuth2Client } from 'google-auth-library'
-import { createOrUpdateUser, getUserById } from '../db.js'
+import { createOrUpdateUser, getUserById, pool } from '../db.js'
 import { env } from 'process'
 
 const router = Router()
@@ -76,10 +76,61 @@ router.get('/me', verifyToken, async (req, res) => {
   try {
     const user = await getUserById(req.userId)
     if (!user) return res.status(404).json({ error: 'User not found' })
-    return res.json({ ok: true, user })
+    return res.json({ ok: true, data: user })
   } catch (err) {
     console.error('Get user error:', err)
     return res.status(500).json({ error: 'Failed to get user' })
+  }
+})
+
+// Update user profile
+router.put('/update-profile', verifyToken, async (req, res) => {
+  try {
+    const { name, email } = req.body
+    
+    if (!name || !email) {
+      return res.status(400).json({ error: 'Name and email are required' })
+    }
+
+    // Check if email is already taken by another user
+    const [existingUser] = await pool.query('SELECT id FROM users WHERE email = ? AND id != ?', [email, req.userId])
+    if (existingUser.length > 0) {
+      return res.status(400).json({ error: 'Email already in use' })
+    }
+
+    // Update user
+    await pool.query('UPDATE users SET name = ?, email = ?, updated_at = NOW() WHERE id = ?', [
+      name,
+      email,
+      req.userId,
+    ])
+
+    // Get updated user
+    const user = await getUserById(req.userId)
+    return res.json({
+      ok: true,
+      message: 'Profile updated successfully',
+      data: user,
+    })
+  } catch (err) {
+    console.error('Update profile error:', err)
+    return res.status(500).json({ error: 'Failed to update profile' })
+  }
+})
+
+// Delete user account
+router.delete('/delete-account', verifyToken, async (req, res) => {
+  try {
+    // Delete user from database
+    await pool.query('DELETE FROM users WHERE id = ?', [req.userId])
+    
+    return res.json({
+      ok: true,
+      message: 'Account deleted successfully',
+    })
+  } catch (err) {
+    console.error('Delete account error:', err)
+    return res.status(500).json({ error: 'Failed to delete account' })
   }
 })
 

@@ -25,37 +25,43 @@
 
 .navbar{
     position: fixed;
-    padding: 15px 0 15px 0;
+    padding: 12px 0;
     width: 100%;
     transition: all 0.3s ease;
     z-index: 9999;
     animation: FadeInDown 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     will-change: transform, opacity;
+    background-color: transparent;
 }
 .navbar.color-active{
-    background-color:var(--navbar-color);
-    padding: 20px 0 20px 0;
-    border-bottom: 2px solid  #dc35469c;
+    background-color: var(--navbar-color);
+    padding: 18px 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-bottom: 2px solid #dc35469c;
 }
 
 .navbar .nav-link a{
-    padding: 5px 10px 5px 10px;
+    padding: 6px 12px;
     text-decoration: none;
     font-weight: 500;
     color: var(--navbar-color-text);
+    transition: all 0.2s ease;
+    border-radius: 4px;
 }
 
 .navbar .nav-link a:hover{
     color: var(--secondary-color);
+    transform: translateY(-2px);
 }
 .navbar .nav-link a.active{
-    color: var(--primary-color);
+    color: white;
     background: var(--secondary-color);
-    border-radius: 2px;
+    border-radius: 4px;
+    font-weight: 600;
 }
 .navbar .nav-link a.active:hover{
-    color:var(--navbar-color);
-;
+    color: white;
+    background: #c0392b;
 }
 
 /* Style button links */

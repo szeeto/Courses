@@ -6,7 +6,7 @@ echo ""
 
 # Step 1: Check MySQL
 echo "1️⃣  Checking MySQL connection..."
-mysql -h 127.0.0.1 -u root -e "SELECT 'MySQL is running' as status;" 2>&1 | head -5
+
 
 # Step 2: Check port 4000
 echo ""

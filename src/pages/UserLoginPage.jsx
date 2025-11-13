@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { setCookie, getCookie } from '../utils/cookieUtils'
 import './LoginPage.css'
 
-function LoginPage() {
+function UserLoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const navigate = useNavigate()
@@ -12,7 +12,7 @@ function LoginPage() {
     setLoading(true)
     setError('')
     try {
-      console.log('Starting login process...')
+      console.log('Starting user login process...')
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000'
       console.log('Backend URL:', backendUrl)
 
@@ -52,9 +52,10 @@ function LoginPage() {
       setCookie('userEmail', data.user.email, 30)
       
       console.log('Token saved to localStorage and cookies')
-      console.log('User info saved')
+      console.log('User info saved to localStorage and cookies')
+      console.log('User already saved to database by backend')
 
-      // Redirect to home page
+      // Redirect immediately to home page for regular users
       console.log('Redirecting to home page...')
       navigate('/', { replace: true })
     } catch (err) {
@@ -100,9 +101,9 @@ function LoginPage() {
 
   return (
     <div className="page-root page-animate animate__animated animate__fadeIn login-container">
-      <div className="login-card">
+      <div className="login-card user-login">
         <div className="login-icon">👤</div>
-        <h1>Welcome to Ngoding</h1>
+        <h1>User Login</h1>
         <p className="login-subtitle">Sign in with your Google account</p>
 
         {error && <div className="alert alert-danger">{error}</div>}
@@ -117,10 +118,13 @@ function LoginPage() {
 
         <div className="login-footer">
           <p>New here? Just sign in to create an account</p>
+          <p className="login-mode-link">
+            Admin? <a href="/login/admin">Login as Admin</a>
+          </p>
         </div>
       </div>
     </div>
   )
 }
 
-export default LoginPage
+export default UserLoginPage

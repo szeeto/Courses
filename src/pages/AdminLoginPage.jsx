@@ -1,18 +1,20 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { setCookie, getCookie } from '../utils/cookieUtils'
 import './LoginPage.css'
 
-function LoginPage() {
+function AdminLoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const navigate = useNavigate()
+
+  const ADMIN_EMAILS = useMemo(() => ['patrasawali93@gmail.com'], [])
 
   const handleCredentialResponse = useCallback(async (response) => {
     setLoading(true)
     setError('')
     try {
-      console.log('Starting login process...')
+      console.log('Starting admin login process...')
       const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000'
       console.log('Backend URL:', backendUrl)
 
@@ -41,6 +43,16 @@ function LoginPage() {
         throw new Error('Invalid response from server')
       }
 
+      // Check if user is admin
+      if (!ADMIN_EMAILS.includes(data.user.email)) {
+        console.error('User is not an admin:', data.user.email)
+        setError('Access denied. You are not authorized as an admin.')
+        setLoading(false)
+        return
+      }
+
+      console.log('Admin verified:', data.user.email)
+
       console.log('Saving to localStorage and cookies...')
       // Save to localStorage
       localStorage.setItem('authToken', data.token)
@@ -52,18 +64,18 @@ function LoginPage() {
       setCookie('userEmail', data.user.email, 30)
       
       console.log('Token saved to localStorage and cookies')
-      console.log('User info saved')
+      console.log('Admin user logged in')
 
-      // Redirect to home page
-      console.log('Redirecting to home page...')
-      navigate('/', { replace: true })
+      // Redirect to admin dashboard
+      console.log('Redirecting to admin dashboard...')
+      navigate('/admin', { replace: true })
     } catch (err) {
       console.error('Login error:', err)
       setError(err.message || 'Login failed, please try again')
     } finally {
       setLoading(false)
     }
-  }, [navigate])
+  }, [navigate, ADMIN_EMAILS])
 
   // Load Google API script
   useEffect(() => {
@@ -90,37 +102,77 @@ function LoginPage() {
   }, [handleCredentialResponse])
 
   // Check if user is already logged in
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false)
+
   useEffect(() => {
     const token = getCookie('authToken') || localStorage.getItem('authToken')
     if (token) {
-      console.log('User already logged in, redirecting to home...')
-      navigate('/', { replace: true })
+      const user = localStorage.getItem('user')
+      if (user) {
+        const userData = JSON.parse(user)
+        if (ADMIN_EMAILS.includes(userData.email)) {
+          console.log('Admin already logged in')
+          setIsAdminLoggedIn(true)
+        }
+      }
     }
-  }, [navigate])
+  }, [ADMIN_EMAILS])
 
   return (
     <div className="page-root page-animate animate__animated animate__fadeIn login-container">
-      <div className="login-card">
-        <div className="login-icon">👤</div>
-        <h1>Welcome to Ngoding</h1>
-        <p className="login-subtitle">Sign in with your Google account</p>
+      <div className="login-card admin-login">
+        <div className="login-icon">🔐</div>
+        <h1>Admin Login</h1>
+        <p className="login-subtitle">Sign in with your admin account</p>
 
         {error && <div className="alert alert-danger">{error}</div>}
 
-        {loading ? (
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
+        {isAdminLoggedIn ? (
+          <div className="admin-already-logged">
+            <div className="alert alert-success">
+              ✅ You are already logged in as admin
+            </div>
+            <button 
+              className="btn btn-primary btn-lg w-100 mb-3"
+              onClick={() => navigate('/admin', { replace: true })}
+            >
+              Go to Admin Dashboard
+            </button>
+            <button 
+              className="btn btn-outline-secondary w-100"
+              onClick={() => {
+                localStorage.removeItem('authToken')
+                localStorage.removeItem('user')
+                setIsAdminLoggedIn(false)
+              }}
+            >
+              Logout & Login as Different Admin
+            </button>
           </div>
         ) : (
-          <div id="googleSignInButton"></div>
+          <>
+            <div className="admin-notice">
+              ⚠️ This is an admin-only login. Only authorized administrators can access this area.
+            </div>
+
+            {loading ? (
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+            ) : (
+              <div id="googleSignInButton"></div>
+            )}
+          </>
         )}
 
         <div className="login-footer">
-          <p>New here? Just sign in to create an account</p>
+          <p className="login-mode-link">
+            Regular user? <a href="/login/user">Login as User</a>
+          </p>
         </div>
       </div>
     </div>
   )
 }
 
-export default LoginPage
+export default AdminLoginPage
