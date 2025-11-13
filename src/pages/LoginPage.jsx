@@ -12,7 +12,7 @@ function LoginPage() {
     setLoading(true)
     setError('')
     try {
-      console.log('Starting login process...')
+      console.log('Starting Google login process...')
       
       // Get backend URL from environment or use current domain
       let backendUrl = import.meta.env.VITE_BACKEND_URL
@@ -110,23 +110,64 @@ function LoginPage() {
 
   return (
     <div className="page-root page-animate animate__animated animate__fadeIn login-container">
-      <div className="login-card">
-        <div className="login-icon">👤</div>
-        <h1>Welcome to Ngoding</h1>
-        <p className="login-subtitle">Sign in with your Google account</p>
+      <div className="login-wrapper">
+        <div className="login-card">
+          <div className="login-icon">👤</div>
+          <h1>Welcome to Ngoding</h1>
+          <p className="login-subtitle">Choose your login method</p>
 
-        {error && <div className="alert alert-danger">{error}</div>}
+          {error && <div className="alert alert-danger">{error}</div>}
 
-        {loading ? (
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
+          {loading ? (
+            <div className="spinner-container">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <p>Processing...</p>
+            </div>
+          ) : (
+            <>
+              {/* Google Sign In */}
+              <div className="login-section">
+                <h3>Sign in with Google</h3>
+                <div id="googleSignInButton"></div>
+              </div>
+
+              {/* Divider */}
+              <div className="login-divider">
+                <span>OR</span>
+              </div>
+
+              {/* Custom Login/Register */}
+              <div className="login-section custom-auth">
+                <h3>Sign in with Email</h3>
+                <div className="auth-buttons">
+                  <button 
+                    className="btn-auth btn-login"
+                    onClick={() => navigate('/login/custom')}
+                  >
+                    <span className="btn-icon">📧</span>
+                    <span className="btn-text">Email Login</span>
+                  </button>
+                  <button 
+                    className="btn-auth btn-register"
+                    onClick={() => navigate('/register')}
+                  >
+                    <span className="btn-icon">✍️</span>
+                    <span className="btn-text">Create Account</span>
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+
+          <div className="login-footer">
+            <p>🔒 Your data is secure and encrypted</p>
+            <p className="footer-links">
+              <a href="/syaratketen">Terms</a> • 
+              <a href="/privacy.html"> Privacy</a>
+            </p>
           </div>
-        ) : (
-          <div id="googleSignInButton"></div>
-        )}
-
-        <div className="login-footer">
-          <p>New here? Just sign in to create an account</p>
         </div>
       </div>
     </div>
