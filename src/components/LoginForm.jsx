@@ -100,7 +100,7 @@ function LoginForm() {
         </form>
 
         <p className="auth-link">
-          Belum punya akun? <a href="/register">Daftar di sini</a>
+          Belum punya akun? <a href="/register" onClick={(e) => { e.preventDefault(); navigate('/register'); }}>Daftar di sini</a>
         </p>
       </div>
     </div>

@@ -148,7 +148,7 @@ function RegisterForm() {
         </form>
 
         <p className="auth-link">
-          Sudah punya akun? <a href="/login">Masuk di sini</a>
+          Sudah punya akun? <a href="/login" onClick={(e) => { e.preventDefault(); navigate('/login'); }}>Masuk di sini</a>
         </p>
       </div>
     </div>

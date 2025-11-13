@@ -109,7 +109,7 @@ function LoginPage() {
   }, [navigate])
 
   return (
-    <div className="page-root page-animate animate__animated animate__fadeIn login-container">
+    <div className="login-container">
       <div className="login-wrapper">
         <div className="login-card">
           <div className="login-icon">👤</div>
@@ -120,8 +120,8 @@ function LoginPage() {
 
           {loading ? (
             <div className="spinner-container">
-              <div className="spinner-border text-primary" role="status">
-                <span className="visually-hidden">Loading...</span>
+              <div className="spinner">
+                <div className="spinner-ring"></div>
               </div>
               <p>Processing...</p>
             </div>
