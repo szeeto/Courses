@@ -36,7 +36,7 @@ const NavbarComponents = () => {
             })}
           </Nav>
           <div className='text-center'>
-            <button className="btn btn-outline-danger rounded-1"> <a href="#">Join With Us</a></button>
+            <NavLink to="/login" className="btn btn-outline-danger rounded-1">Login</NavLink>
           </div>
         </Navbar.Collapse>
       </Container>

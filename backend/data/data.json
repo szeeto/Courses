@@ -1,0 +1,12 @@
+{
+  "kelas": [
+    { "id": 1, "title": "Belajar React", "image": "/assets/kelas-1-CNwsoEWI.jpg", "price": "Rp100.000" },
+    { "id": 2, "title": "Desain UI/UX", "image": "/assets/kelas-2-75rT1yUM.jpg", "price": "Rp120.000" }
+  ],
+  "testimonial": [
+    { "id": 1, "name": "Andi", "skill": "Desainer", "desc": "Kelasnya sangat membantu", "image": "/assets/people-1-BrgjIl-A.jpg" }
+  ],
+  "faq": [
+    { "id": "0", "title": "Bagaimana cara bayar?", "desc": "Gunakan transfer bank atau e-wallet." }
+  ]
+}
