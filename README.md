@@ -133,14 +133,83 @@ See `GOOGLE_OAUTH_VERCEL_FIX.md` for complete setup guide.
 
 ## 🌐 Deployment
 
-### Deploy to Vercel
+### Quick Deploy to Vercel (Recommended)
 
-1. Push your code to GitHub
-2. Connect GitHub to Vercel
-3. Add environment variables in Vercel dashboard
-4. Deploy!
+**Step 1: Push to GitHub** (you already have this)
+```bash
+git push origin main
+```
 
-**Important:** Follow the OAuth guide in `GOOGLE_OAUTH_VERCEL_FIX.md`
+**Step 2: Create Vercel Project**
+1. Go to https://vercel.com/new
+2. Import your GitHub repository
+3. Framework: Select **React**
+4. Click **Deploy**
+
+**Step 3: Add Environment Variables**
+In Vercel dashboard, go to Settings → Environment Variables:
+```
+VITE_GOOGLE_CLIENT_ID=your_google_client_id
+VITE_BACKEND_URL=          (leave empty for same domain)
+```
+
+**Step 4: Configure Google OAuth**
+1. Go to [Google Cloud Console](https://console.cloud.google.com)
+2. Select your OAuth client
+3. Add **Authorized JavaScript origins:**
+   ```
+   https://your-vercel-domain.vercel.app
+   ```
+4. Add **Authorized redirect URIs:**
+   ```
+   https://your-vercel-domain.vercel.app/login
+   ```
+
+**Step 5: Redeploy**
+- Go to Vercel Deployments
+- Click the latest deployment and select "Redeploy"
+- Wait for deployment to complete
+- Visit your domain and test login!
+
+### Deploy Backend (Optional)
+
+If you have a backend API, deploy it separately:
+
+**Option A: Deploy to Vercel**
+1. In Vercel, click "Add New" → "Project"
+2. Select same repository
+3. Root Directory: `backend`
+4. Add backend environment variables
+
+**Option B: Deploy to Other Platforms**
+- Railway, Render, Heroku, etc.
+- Update `VITE_BACKEND_URL` in frontend
+
+**Backend Environment Variables:**
+```
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+JWT_SECRET=your_secure_jwt_secret_32_chars_minimum
+FRONTEND_URL=https://your-vercel-domain.vercel.app
+DB_HOST=your_database_host
+DB_USER=your_database_user
+DB_PASSWORD=your_database_password
+DB_NAME=your_database_name
+```
+
+---
+
+## 📖 Complete Deployment Guide
+
+For detailed step-by-step deployment instructions, see **`VERCEL_DEPLOYMENT_GUIDE.md`**
+
+Topics covered:
+- Frontend + Backend on same domain
+- Frontend and Backend on separate domains
+- Environment variable setup
+- Google OAuth configuration
+- Troubleshooting
+- Production best practices
 
 ---
 
@@ -186,27 +255,43 @@ npm run lint       # Run ESLint
 
 ## 🐛 Troubleshooting
 
-### OAuth Error on Vercel
-See `GOOGLE_OAUTH_VERCEL_FIX.md` for complete troubleshooting guide.
+### Login not working on Vercel
+1. Check that Google OAuth domain is registered
+2. Verify `VITE_GOOGLE_CLIENT_ID` is set in Vercel
+3. Check browser console for errors (F12 → Console)
+4. See `GOOGLE_OAUTH_VERCEL_FIX.md` for detailed solutions
 
-### Login not working
-1. Check Google Client ID in `.env`
-2. Verify JavaScript origins in Google Cloud Console
-3. Check browser console for errors (F12)
-4. Verify backend is running (if applicable)
+### "Origin not allowed" Error
+- Add your Vercel domain to Google Cloud Console
+- Check for typos (http vs https, www prefix, trailing slash)
+- Wait 5 minutes for Google to update
 
-### Backend connection issues
-1. Check `VITE_BACKEND_URL` in `.env`
-2. Verify backend is running on correct port
-3. Check CORS configuration in backend
+### Backend connection error
+1. Check `VITE_BACKEND_URL` in Vercel environment variables
+2. Verify backend is deployed and running
+3. Check CORS configuration (see `VERCEL_DEPLOYMENT_GUIDE.md`)
+4. Check browser Network tab for failed requests
+
+### Login successful but redirect fails
+1. Check backend logs in Vercel
+2. Verify database credentials
+3. Check JWT_SECRET is set in backend
+4. See backend deployment guide
+
+### Database connection issues (Backend)
+1. Verify database credentials are correct
+2. Check if database is accessible from Vercel IP
+3. Add Vercel IP to database whitelist
+4. Test connection string locally first
 
 ---
 
 ## 📚 Documentation
 
-- `GOOGLE_OAUTH_VERCEL_FIX.md` - OAuth setup and troubleshooting for production
-- `.env.example` - Environment variables template
-- `backend/README.md` - Backend documentation
+- **`VERCEL_DEPLOYMENT_GUIDE.md`** - Complete step-by-step deployment guide (START HERE!)
+- **`GOOGLE_OAUTH_VERCEL_FIX.md`** - OAuth setup and troubleshooting
+- **`.env.example`** - Environment variables template
+- **`backend/README.md`** - Backend documentation
 
 ---
 
