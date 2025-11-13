@@ -48,6 +48,7 @@ export async function initDB(){
       google_id VARCHAR(255) UNIQUE,
       email VARCHAR(255) UNIQUE,
       name VARCHAR(255),
+      password VARCHAR(255),
       picture TEXT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP

@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken'
 import { OAuth2Client } from 'google-auth-library'
 import { createOrUpdateUser, getUserById, pool } from '../db.js'
 import { env } from 'process'
+import bcrypt from 'bcrypt'
 
 const router = Router()
 
@@ -22,6 +23,109 @@ export function verifyToken(req, res, next) {
     return res.status(401).json({ error: 'Invalid token' })
   }
 }
+
+// Email/Password Registration
+router.post('/register', async (req, res) => {
+  const { name, email, password } = req.body
+
+  try {
+    // Validate input
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: 'Name, email, and password are required' })
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters' })
+    }
+
+    // Check if user already exists
+    const [existingUser] = await pool.query('SELECT id FROM users WHERE email = ?', [email])
+    if (existingUser.length > 0) {
+      return res.status(400).json({ error: 'Email already registered' })
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    // Create user
+    const [result] = await pool.query(
+      'INSERT INTO users (google_id, email, name, password, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())',
+      [`user_${Date.now()}`, email, name, hashedPassword]
+    )
+
+    const userId = result.insertId
+    const user = await getUserById(userId)
+
+    // Create JWT token
+    const jwtToken = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, {
+      expiresIn: '30d',
+    })
+
+    return res.status(201).json({
+      ok: true,
+      message: 'Registration successful',
+      token: jwtToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      },
+    })
+  } catch (err) {
+    console.error('Registration error:', err)
+    return res.status(500).json({ error: 'Registration failed' })
+  }
+})
+
+// Email/Password Login
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body
+
+  try {
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' })
+    }
+
+    // Find user by email
+    const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email])
+    
+    if (users.length === 0) {
+      return res.status(401).json({ error: 'Invalid email or password' })
+    }
+
+    const user = users[0]
+
+    // Check password
+    if (!user.password) {
+      return res.status(401).json({ error: 'This account uses Google OAuth. Please use Google Sign In.' })
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password)
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Invalid email or password' })
+    }
+
+    // Create JWT token
+    const jwtToken = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, {
+      expiresIn: '30d',
+    })
+
+    return res.json({
+      ok: true,
+      message: 'Login successful',
+      token: jwtToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      },
+    })
+  } catch (err) {
+    console.error('Login error:', err)
+    return res.status(500).json({ error: 'Login failed' })
+  }
+})
 
 // Google Sign In
 router.post('/google-signin', async (req, res) => {
