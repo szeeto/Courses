@@ -30,8 +30,15 @@ function LoginForm() {
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Login gagal')
+        try {
+          const errorData = await response.json()
+          throw new Error(errorData.error || 'Login gagal')
+        } catch (err) {
+          if (err instanceof SyntaxError) {
+            throw new Error(`Server error: ${response.status} ${response.statusText}`)
+          }
+          throw err
+        }
       }
 
       const data = await response.json()

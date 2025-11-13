@@ -38,9 +38,16 @@ function LoginPage() {
       console.log('Backend response status:', backendRes.status)
 
       if (!backendRes.ok) {
-        const errorData = await backendRes.json()
-        console.error('Backend error:', errorData)
-        throw new Error(errorData.error || 'Sign in failed')
+        try {
+          const errorData = await backendRes.json()
+          console.error('Backend error:', errorData)
+          throw new Error(errorData.error || 'Sign in failed')
+        } catch (err) {
+          if (err instanceof SyntaxError) {
+            throw new Error(`Server error: ${backendRes.status} ${backendRes.statusText}`)
+          }
+          throw err
+        }
       }
 
       const data = await backendRes.json()
@@ -80,23 +87,39 @@ function LoginPage() {
     // Register callback globally
     window.handleCredentialResponse = handleCredentialResponse
 
-    const script = document.createElement('script')
-    script.src = 'https://accounts.google.com/gsi/client'
-    script.async = true
-    script.defer = true
-    script.onload = function () {
-      if (window.google) {
-        window.google.accounts.id.initialize({
-          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-          callback: handleCredentialResponse,
-        })
-        window.google.accounts.id.renderButton(
-          document.getElementById('googleSignInButton'),
-          { theme: 'outline', size: 'large' }
-        )
-      }
+    // Check if script already loaded
+    if (window.google) {
+      window.google.accounts.id.initialize({
+        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+        callback: handleCredentialResponse,
+      })
+      window.google.accounts.id.renderButton(
+        document.getElementById('googleSignInButton'),
+        { theme: 'outline', size: 'large' }
+      )
+      return
     }
-    document.head.appendChild(script)
+
+    // Only load script if not already present
+    if (!document.querySelector('script[src="https://accounts.google.com/gsi/client"]')) {
+      const script = document.createElement('script')
+      script.src = 'https://accounts.google.com/gsi/client'
+      script.async = true
+      script.defer = true
+      script.onload = function () {
+        if (window.google) {
+          window.google.accounts.id.initialize({
+            client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+            callback: handleCredentialResponse,
+          })
+          window.google.accounts.id.renderButton(
+            document.getElementById('googleSignInButton'),
+            { theme: 'outline', size: 'large' }
+          )
+        }
+      }
+      document.head.appendChild(script)
+    }
   }, [handleCredentialResponse])
 
   // Check if user is already logged in

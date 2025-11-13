@@ -42,7 +42,7 @@ export function useAuth() {
       }
       
       const data = await response.json()
-      setUser(data.user)
+      setUser(data.data || data.user)
       return true
     } catch (err) {
       console.error('Token verification failed:', err)
