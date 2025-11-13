@@ -10,7 +10,33 @@ import { env, exit } from 'process'
 const app = express()
 const PORT = env.PORT ?? 4000
 
-app.use(cors())
+// CORS configuration for Vercel and local development
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:3000',
+  env.FRONTEND_URL || 'http://localhost:5173',
+  // Add your Vercel frontend domain
+  ...(env.VERCEL_URL ? [`https://${env.VERCEL_URL}`] : []),
+]
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true)
+    } else {
+      console.warn(`CORS blocked request from origin: ${origin}`)
+      callback(null, true) // Allow for now, log for debugging
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}
+
+app.use(cors(corsOptions))
 app.use(express.json())
 
 // Initialize DB then mount routes and start server

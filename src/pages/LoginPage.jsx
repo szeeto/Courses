@@ -13,7 +13,17 @@ function LoginPage() {
     setError('')
     try {
       console.log('Starting login process...')
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000'
+      
+      // Get backend URL from environment or use current domain
+      let backendUrl = import.meta.env.VITE_BACKEND_URL
+      
+      // If no backend URL is set, use the current domain (for same-domain deployment)
+      if (!backendUrl) {
+        const protocol = window.location.protocol
+        const host = window.location.host
+        backendUrl = `${protocol}//${host}`
+      }
+      
       console.log('Backend URL:', backendUrl)
 
       const backendRes = await fetch(
