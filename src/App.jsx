@@ -8,15 +8,13 @@ import Kelas from './pages/KelasPage'
 import SyaratKetenPage from './pages/SyaratKetenPage'
 import FaqPage from './pages/FaqPage'
 import TestimoniPage from './pages/TestimoniPage'
-import LoginPage from './pages/LoginPage'
-import CustomLoginPage from './pages/CustomLoginPage'
-import RegisterPage from './pages/RegisterPage'
+import UserLoginPage from './pages/UserLoginPage.jsx'
 import AdminPage from './pages/AdminPage'
 import UserSettings from './pages/UserSettings'
 
 function App() {
   const location = useLocation()
-  const isLoginPage = location.pathname === '/login' || location.pathname === '/login/custom' || location.pathname === '/register'
+  const isLoginPage = location.pathname === '/login'
   const isAdminPage = location.pathname === '/admin'
   const isSettingsPage = location.pathname === '/settings'
 
@@ -30,9 +28,7 @@ function App() {
           <Route path="/testimoni" element={<TestimoniPage />} />
           <Route path="/faq" element={<FaqPage />} />
           <Route path="/syaratketen" element={<SyaratKetenPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/login/custom" element={<CustomLoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/login" element={<UserLoginPage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/settings" element={<UserSettings />} />
         </Routes>

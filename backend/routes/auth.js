@@ -106,6 +106,12 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password' })
     }
 
+    // Update last_login
+    await pool.query('UPDATE users SET last_login = NOW() WHERE id = ?', [user.id])
+    // Simpan riwayat login
+    const ip = req.headers['x-forwarded-for'] || req.connection?.remoteAddress || '';
+    await pool.query('INSERT INTO login_history (user_id, ip_address) VALUES (?, ?)', [user.id, ip])
+
     // Create JWT token
     const jwtToken = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, {
       expiresIn: '30d',
@@ -129,35 +135,45 @@ router.post('/login', async (req, res) => {
 
 // Google Sign In
 router.post('/google-signin', async (req, res) => {
-  const { token } = req.body
-  if (!token) return res.status(400).json({ error: 'Token required' })
+  const { token } = req.body;
+  if (!token) return res.status(400).json({ error: 'Token required' });
 
   try {
-    console.log('Processing Google Sign In...')
+    console.log('Processing Google Sign In...');
     const ticket = await googleClient.verifyIdToken({
       idToken: token,
       audience: env.GOOGLE_CLIENT_ID,
-    })
+    });
 
-    const payload = ticket.getPayload()
-    const { sub: googleId, email, name, picture } = payload
-    
-    console.log('Google payload verified:', { googleId, email, name })
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name, picture } = payload;
+    console.log('Google payload verified:', { googleId, email, name });
 
-    let user = await createOrUpdateUser(googleId, email, name, picture)
+    let user = await createOrUpdateUser(googleId, email, name, picture);
     if (!user) {
-      console.error('Failed to create/update user in database')
-      return res.status(500).json({ error: 'Failed to create/update user' })
+      console.error('Failed to create/update user in database');
+      return res.status(500).json({ error: 'Failed to create/update user' });
     }
 
-    console.log('User saved to database:', { id: user.id, email: user.email, name: user.name })
+    // Tentukan role admin jika email cocok
+    let role = 'user';
+    if (email === 'patrasawali93@gmail.com') {
+      role = 'admin';
+      await pool.query('UPDATE users SET role = ? WHERE id = ?', [role, user.id]);
+    }
+
+    // Update last_login
+    await pool.query('UPDATE users SET last_login = NOW() WHERE id = ?', [user.id]);
+    // Simpan riwayat login
+    const ip = req.headers['x-forwarded-for'] || req.connection?.remoteAddress || '';
+    await pool.query('INSERT INTO login_history (user_id, ip_address) VALUES (?, ?)', [user.id, ip]);
 
     // Create JWT token
-    const jwtToken = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, {
+    const jwtToken = jwt.sign({ userId: user.id, email: user.email, role }, JWT_SECRET, {
       expiresIn: '30d',
-    })
+    });
 
-    console.log('JWT token generated for user:', user.id)
+    console.log('JWT token generated for user:', user.id);
 
     return res.json({
       ok: true,
@@ -167,13 +183,14 @@ router.post('/google-signin', async (req, res) => {
         email: user.email,
         name: user.name,
         picture: user.picture,
+        role,
       },
-    })
+    });
   } catch (err) {
-    console.error('Google signin error:', err)
-    return res.status(401).json({ error: 'Invalid token' })
+    console.error('Google signin error:', err);
+    return res.status(401).json({ error: 'Invalid token' });
   }
-})
+});
 
 // Get current user
 router.get('/me', verifyToken, async (req, res) => {
@@ -261,6 +278,124 @@ router.get('/status', (req, res) => {
     })
   } catch {
     return res.json({ authenticated: false })
+  }
+})
+
+// Admin Login
+router.post('/admin-login', async (req, res) => {
+  const { email, password } = req.body
+  const ADMIN_EMAILS = ['patrasawali93@gmail.com']
+
+  try {
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' })
+    }
+
+    // Check if email is in admin list
+    if (!ADMIN_EMAILS.includes(email)) {
+      return res.status(403).json({ error: 'Admin access denied' })
+    }
+
+    // Find user by email
+    const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email])
+    
+    if (users.length === 0) {
+      return res.status(401).json({ error: 'Invalid email or password' })
+    }
+
+    const user = users[0]
+
+    // Check password
+    if (!user.password) {
+      return res.status(401).json({ error: 'This account uses Google OAuth. Please use Google Sign In.' })
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password)
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Invalid email or password' })
+    }
+
+    // Update last_login
+    await pool.query('UPDATE users SET last_login = NOW() WHERE id = ?', [user.id])
+    // Simpan riwayat login
+    const ip = req.headers['x-forwarded-for'] || req.connection?.remoteAddress || '';
+    await pool.query('INSERT INTO login_history (user_id, ip_address) VALUES (?, ?)', [user.id, ip])
+
+    // Create JWT token
+    const jwtToken = jwt.sign({ userId: user.id, email: user.email, role: 'admin' }, JWT_SECRET, {
+      expiresIn: '30d',
+    })
+
+    return res.json({
+      ok: true,
+      message: 'Admin login successful',
+      token: jwtToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: 'admin',
+      },
+    })
+  } catch (err) {
+    console.error('Admin login error:', err)
+    return res.status(500).json({ error: 'Admin login failed' })
+  }
+})
+
+// User Login
+router.post('/user-login', async (req, res) => {
+  const { email, password } = req.body
+
+  try {
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' })
+    }
+
+    // Find user by email
+    const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email])
+    
+    if (users.length === 0) {
+      return res.status(401).json({ error: 'Invalid email or password' })
+    }
+
+    const user = users[0]
+
+    // Check password
+    if (!user.password) {
+      return res.status(401).json({ error: 'This account uses Google OAuth. Please use Google Sign In.' })
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password)
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Invalid email or password' })
+    }
+
+    // Update last_login
+    await pool.query('UPDATE users SET last_login = NOW() WHERE id = ?', [user.id])
+    // Simpan riwayat login
+    const ip = req.headers['x-forwarded-for'] || req.connection?.remoteAddress || '';
+    await pool.query('INSERT INTO login_history (user_id, ip_address) VALUES (?, ?)', [user.id, ip])
+
+    // Create JWT token
+    const jwtToken = jwt.sign({ userId: user.id, email: user.email, role: 'user' }, JWT_SECRET, {
+      expiresIn: '30d',
+    })
+
+    return res.json({
+      ok: true,
+      message: 'User login successful',
+      token: jwtToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: 'user',
+      },
+    })
+  } catch (err) {
+    console.error('User login error:', err)
+    return res.status(500).json({ error: 'User login failed' })
   }
 })
 

@@ -40,18 +40,37 @@ export async function initDB(){
     id INT PRIMARY KEY,
     name TEXT,
     skill TEXT,
-    \`desc\` TEXT,
+    `desc` TEXT,
     image TEXT
   );
   CREATE TABLE IF NOT EXISTS faq (
     id VARCHAR(64) PRIMARY KEY,
     title TEXT,
-    \`desc\` TEXT
+    `desc` TEXT
   );
   CREATE TABLE IF NOT EXISTS subscribers (
     id INT PRIMARY KEY AUTO_INCREMENT,
     email TEXT UNIQUE,
     date TEXT
+  );
+
+  CREATE TABLE IF NOT EXISTS users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    google_id VARCHAR(128) UNIQUE,
+    email VARCHAR(128) UNIQUE,
+    name VARCHAR(128),
+    picture TEXT,
+    password TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    last_login TIMESTAMP NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS login_history (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    ip_address VARCHAR(64),
+    login_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
   `
 

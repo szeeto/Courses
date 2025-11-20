@@ -51,7 +51,15 @@ export async function initDB(){
       password VARCHAR(255),
       picture TEXT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      last_login TIMESTAMP NULL
+    )`,
+    `CREATE TABLE IF NOT EXISTS login_history (
+      id INT PRIMARY KEY AUTO_INCREMENT,
+      user_id INT,
+      login_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      ip_address VARCHAR(64),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     )`,
     `CREATE TABLE IF NOT EXISTS kelas (
       id INT PRIMARY KEY,

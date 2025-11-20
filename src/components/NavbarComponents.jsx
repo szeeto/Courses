@@ -61,13 +61,13 @@ const NavbarComponents = () => {
               )
             })}
           </Nav>
-          <div className='text-center d-flex gap-2 justify-content-center'>
+          {/* <div className='text-center d-flex gap-2 justify-content-center'>
             {isLoggedIn ? (
               <UserDropdown userName={userName} isAdmin={isAdmin} />
             ) : (
-              <NavLink to="/login" className="btn btn-outline-danger rounded-1">Login</NavLink>
+             <NavLink to="/login" className="btn btn-outline-danger rounded-1">Login</NavLink>
             )}
-          </div>
+          </div> */}
         </Navbar.Collapse>
       </Container>
     </Navbar>
