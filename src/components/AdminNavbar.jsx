@@ -34,6 +34,13 @@ function AdminNavbar() {
         <div className="admin-navbar-links">
           <button 
             className="admin-nav-link"
+            onClick={() => navigate('/adminPanel/profile')}
+            title="View Profile"
+          >
+            👤 View Profile
+          </button>
+          <button 
+            className="admin-nav-link"
             onClick={() => window.scrollTo(0, 0)}
             title="Dashboard"
           >

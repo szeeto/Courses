@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { deleteCookie } from '../utils/cookieUtils'
 import './UserSettings.css'
 
+
 function UserSettings() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -10,6 +11,8 @@ function UserSettings() {
   const [success, setSuccess] = useState('')
   const [editMode, setEditMode] = useState(false)
   const [formData, setFormData] = useState({ name: '', email: '' })
+  const [pictureFile, setPictureFile] = useState(null)
+  const [picturePreview, setPicturePreview] = useState(null)
   const navigate = useNavigate()
 
   const token = localStorage.getItem('authToken')
@@ -50,6 +53,25 @@ function UserSettings() {
 
     try {
       setLoading(true)
+      let updatedUser = null;
+      // Jika ada file gambar baru, upload dulu
+      if (pictureFile) {
+        const form = new FormData();
+        form.append('picture', pictureFile);
+        const resPic = await fetch(`${backendUrl}/auth/upload-picture`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+          body: form,
+        });
+        if (!resPic.ok) {
+          const errData = await resPic.json();
+          throw new Error(errData.error || 'Failed to upload picture');
+        }
+        const picData = await resPic.json();
+        updatedUser = picData.data;
+      }
+
+      // Update profile data
       const res = await fetch(`${backendUrl}/auth/update-profile`, {
         method: 'PUT',
         headers: {
@@ -68,11 +90,11 @@ function UserSettings() {
       setUser(data.data)
       setSuccess('Profile updated successfully')
       setEditMode(false)
-      
       // Update localStorage
       localStorage.setItem('user', JSON.stringify(data.data))
-      
       setTimeout(() => setSuccess(''), 3000)
+      setPictureFile(null)
+      setPicturePreview(null)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -171,6 +193,22 @@ function UserSettings() {
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       placeholder="Your email"
                     />
+                  </div>
+                  <div className="form-group">
+                    <label>Profile Picture</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={e => {
+                        if (e.target.files && e.target.files[0]) {
+                          setPictureFile(e.target.files[0]);
+                          setPicturePreview(URL.createObjectURL(e.target.files[0]));
+                        }
+                      }}
+                    />
+                    {picturePreview && (
+                      <img src={picturePreview} alt="Preview" className="profile-pic preview" />
+                    )}
                   </div>
                   <button type="submit" className="btn-save" disabled={loading}>
                     {loading ? 'Saving...' : 'Save Changes'}

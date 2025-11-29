@@ -6,14 +6,14 @@
 
 **Terminal 1 - Backend:**
 ```bash
-cd d:\patra\Courses\backend
+cd \Courses\backend
 npm run dev
 ```
 Wait for: `Backend listening on http://localhost:4000`
 
 **Terminal 2 - Frontend:**
 ```bash
-cd d:\patra\Courses
+cd \Courses
 npm run frontend:dev
 ```
 Wait for: `Local: http://localhost:5173`

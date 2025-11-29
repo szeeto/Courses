@@ -6,6 +6,7 @@ import './UserLoginPage.split.css';
 function UserLoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [remember, setRemember] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -30,10 +31,15 @@ function UserLoginPage() {
           body: JSON.stringify({ token: response.credential }),
         });
         const data = await res.json();
-        if (data.ok && data.token) {
-          localStorage.setItem('token', data.token);
+        if (data.ok && data.token && data.user) {
+          localStorage.setItem('authToken', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
           setSuccess('Login sukses!');
-          navigate('/');
+          if (data.user.role === 'admin') {
+            navigate('/admin');
+          } else {
+            navigate('/');
+          }
         } else {
           setError(data.error || 'Google login failed');
         }
@@ -70,10 +76,15 @@ function UserLoginPage() {
         body: JSON.stringify({ email, password })
       });
       const data = await res.json();
-      if (data.ok && data.token) {
-        localStorage.setItem('token', data.token);
+      if (data.ok && data.token && data.user) {
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
         setSuccess('Login sukses!');
-        setTimeout(() => navigate('/'), 1200);
+        if (data.user.role === 'admin') {
+          setTimeout(() => navigate('/admin'), 1200);
+        } else {
+          setTimeout(() => navigate('/', 1200));
+        }
       } else {
         setError(data.error || 'Email atau password salah');
       }
@@ -84,25 +95,18 @@ function UserLoginPage() {
   };
 
   return (
-    <div className="login-responsive-root">
-      <div className="login-responsive-card">
-        <div className="login-responsive-title">Login</div>
-        <div className="login-responsive-subtitle">Masuk dengan Google atau Email</div>
-        <button
-          type="button"
-          className="google-login-btn-beauty"
-          style={{width:'100%',marginBottom:'18px',background:'#fff',color:'#222',border:'1px solid #eee',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px'}}
-          onClick={() => window.google && window.google.accounts.id.prompt()}
-        >
-          <svg width="22" height="22" viewBox="0 0 48 48"><g><path fill="#4285F4" d="M24 9.5c3.54 0 6.72 1.22 9.22 3.22l6.9-6.9C35.62 2.34 30.13 0 24 0 14.61 0 6.27 5.74 2.44 14.1l8.06 6.27C12.36 13.13 17.73 9.5 24 9.5z"/><path fill="#34A853" d="M46.1 24.5c0-1.64-.15-3.22-.43-4.75H24v9.02h12.44c-.54 2.9-2.18 5.36-4.64 7.02l7.18 5.59C43.73 37.13 46.1 31.27 46.1 24.5z"/><path fill="#FBBC05" d="M10.5 28.37c-.6-1.8-.95-3.7-.95-5.62s.35-3.82.95-5.62l-8.06-6.27C.82 14.61 0 19.13 0 24s.82 9.39 2.44 13.14l8.06 6.27z"/><path fill="#EA4335" d="M24 46c6.13 0 11.62-2.02 15.82-5.5l-7.18-5.59c-2.01 1.35-4.59 2.15-7.64 2.15-6.27 0-11.64-3.63-13.5-8.87l-8.06 6.27C6.27 42.26 14.61 48 24 48z"/></g></svg>
-          Login dengan Google
-        </button>
-        <div className="login-or">atau login dengan email</div>
-        <form className="login-responsive-form" onSubmit={handleLogin}>
+    <div className="login-modern-root">
+      <div className="login-modern-card">
+        <div className="login-modern-header">
+          <h2 className="login-modern-title">Form Login</h2>
+        </div>
+        <div id="google-login-btn" className="google-login-btn-modern"></div>
+        <div className="login-modern-or">atau login dengan email</div>
+        <form className="login-modern-form" onSubmit={handleLogin}>
           <input
             type="email"
-            className="login-responsive-input"
-            placeholder="Email"
+            className="login-modern-input"
+            placeholder="Masukan Email"
             value={email}
             onChange={e => setEmail(e.target.value)}
             required
@@ -110,22 +114,28 @@ function UserLoginPage() {
           />
           <input
             type="password"
-            className="login-responsive-input"
-            placeholder="Password"
+            className="login-modern-input"
+            placeholder="Masukan Password"
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
             disabled={loading}
           />
-          <button className="login-responsive-btn" type="submit" disabled={loading}>
+          <div className="login-modern-row">
+            <label className="login-modern-remember">
+              <input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)} /> Ingatkan saya
+            </label>
+            <a href="#" className="login-modern-link" onClick={e => {e.preventDefault();alert('Fitur lupa password coming soon!')}}>Lupa password?</a>
+          </div>
+          <button className="login-modern-btn" type="submit" disabled={loading}>
             {loading ? 'Memproses...' : 'Login'}
           </button>
-          {error && <div className="login-responsive-error">{error}</div>}
-          {success && <div className="login-responsive-success">{success}</div>}
+          {error && <div className="login-modern-error">{error}</div>}
+          {success && <div className="login-modern-success">{success}</div>}
         </form>
-        <div className="login-responsive-register">
-          Belum punya akun?{' '}
-          <a href="/register" onClick={e => {e.preventDefault();navigate('/register')}}>Daftar sekarang</a>
+        <div className="login-modern-register">
+          Belum menjadi anggota?{' '}
+          <a href="/register" onClick={e => {e.preventDefault();navigate('/register')}}>Daftar Sekarang</a>
         </div>
       </div>
     </div>

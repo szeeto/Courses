@@ -8,7 +8,7 @@ function AdminLoginPage() {
   const [error, setError] = useState('')
   const navigate = useNavigate()
 
-  const ADMIN_EMAILS = useMemo(() => ['patrasawali93@gmail.com'], [])
+  const ADMIN_EMAILS = useMemo(() => ['patrasawali93@gmail.com', 'admin@ngoding.id'], [])
 
   const handleCredentialResponse = useCallback(async (response) => {
     setLoading(true)
@@ -67,8 +67,8 @@ function AdminLoginPage() {
       console.log('Admin user logged in')
 
       // Redirect to admin dashboard
-      console.log('Redirecting to admin dashboard...')
-      navigate('/admin', { replace: true })
+      console.log('Redirecting to admin panel profile...')
+      navigate('/adminPanel/profile', { replace: true })
     } catch (err) {
       console.error('Login error:', err)
       setError(err.message || 'Login failed, please try again')
@@ -134,7 +134,7 @@ function AdminLoginPage() {
             </div>
             <button 
               className="btn btn-primary btn-lg w-100 mb-3"
-              onClick={() => navigate('/admin', { replace: true })}
+              onClick={() => navigate('/adminPanel/profile', { replace: true })}
             >
               Go to Admin Dashboard
             </button>
@@ -149,22 +149,21 @@ function AdminLoginPage() {
               Logout & Login as Different Admin
             </button>
           </div>
-        ) : (
-          <>
-            <div className="admin-notice">
-              ⚠️ This is an admin-only login. Only authorized administrators can access this area.
-            </div>
+          // Pastikan user admin punya properti role: 'admin'
+          const adminUser = { ...data.user, role: 'admin' }
+          console.log('Saving to localStorage and cookies...')
+          localStorage.setItem('authToken', data.token)
+          localStorage.setItem('user', JSON.stringify(adminUser))
+          setCookie('authToken', data.token, 30)
+          setCookie('userInfo', JSON.stringify(adminUser), 30)
+          setCookie('userEmail', adminUser.email, 30)
 
-            {loading ? (
-              <div className="spinner-border text-primary" role="status">
-                <span className="visually-hidden">Loading...</span>
-              </div>
-            ) : (
-              <div id="googleSignInButton"></div>
-            )}
-          </>
-        )}
+          console.log('Token saved to localStorage and cookies')
+          console.log('Admin user logged in')
 
+          // Redirect ke admin profile
+          console.log('Redirecting to admin panel profile...')
+          navigate('/adminPanel/profile', { replace: true })
         <div className="login-footer">
           <p className="login-mode-link">
             Regular user? <a href="/login/user">Login as User</a>

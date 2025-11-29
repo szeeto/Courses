@@ -13,6 +13,8 @@ const JWT_SECRET = env.JWT_SECRET || 'your-secret-key-change-in-production'
 // Verify token middleware
 export function verifyToken(req, res, next) {
   const token = req.headers.authorization?.split(' ')[1]
+  console.log('DEBUG verifyToken: token =', token)
+  console.log('DEBUG verifyToken: JWT_SECRET =', JWT_SECRET)
   if (!token) return res.status(401).json({ error: 'No token provided' })
   try {
     const decoded = jwt.verify(token, JWT_SECRET)
@@ -20,7 +22,7 @@ export function verifyToken(req, res, next) {
     next()
   } catch (err) {
     console.error('Token verification error:', err)
-    return res.status(401).json({ error: 'Invalid token' })
+    return res.status(401).json({ error: 'Invalid token', debug: err.message })
   }
 }
 
@@ -322,7 +324,7 @@ router.post('/admin-login', async (req, res) => {
     await pool.query('INSERT INTO login_history (user_id, ip_address) VALUES (?, ?)', [user.id, ip])
 
     // Create JWT token
-    const jwtToken = jwt.sign({ userId: user.id, email: user.email, role: 'admin' }, JWT_SECRET, {
+    const jwtToken = jwt.sign({ userId: user.id, email: user.email, role: 'user' }, JWT_SECRET, {
       expiresIn: '30d',
     })
 
@@ -334,7 +336,7 @@ router.post('/admin-login', async (req, res) => {
         id: user.id,
         email: user.email,
         name: user.name,
-        role: 'admin',
+        role: 'user',
       },
     })
   } catch (err) {

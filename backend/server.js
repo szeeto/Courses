@@ -1,6 +1,8 @@
+
 /* eslint-env node */
 import express from 'express'
 import cors from 'cors'
+import path from 'path'
 import apiRouter from './routes/api.js'
 import authRouter from './routes/auth.js'
 import adminRouter from './routes/admin.js'
@@ -51,6 +53,9 @@ app.use(express.json())
       res.send({ status: 'ok', message: 'Courses backend is running' })
     })
 
+    
+  // Serve profile pictures statically
+  app.use('/profile_pics', express.static(path.resolve('./public/profile_pics')))
     app.listen(PORT, () => {
       console.log(`Backend listening on http://localhost:${PORT}`)
     })

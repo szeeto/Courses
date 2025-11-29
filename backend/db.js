@@ -50,6 +50,7 @@ export async function initDB(){
       name VARCHAR(255),
       password VARCHAR(255),
       picture TEXT,
+      role VARCHAR(32) DEFAULT 'user',
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       last_login TIMESTAMP NULL

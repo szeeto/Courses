@@ -1,0 +1,23 @@
+.account-settings-container {
+  background: #23272f;
+  color: #fff;
+  border-radius: 14px;
+  box-shadow: 0 4px 24px rgba(76, 0, 130, 0.10);
+  padding: 32px 24px;
+  max-width: 400px;
+  margin: 40px auto;
+}
+.account-settings-container h2 {
+  margin-bottom: 24px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #a084e8;
+}
+.account-info {
+  font-size: 1.1rem;
+  line-height: 2.1;
+}
+.account-info strong {
+  color: #bdbdbd;
+  margin-right: 8px;
+}
