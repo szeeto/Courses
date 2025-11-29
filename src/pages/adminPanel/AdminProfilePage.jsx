@@ -42,7 +42,7 @@ const AdminProfilePage = () => {
             borderRadius: '8px',
             padding: '12px 32px',
             fontSize: '1.08rem',
-            fontWeight: 600,
+            fontdeleWeight: 600,
             cursor: 'pointer',
             boxShadow: '0 2px 8px rgba(76,0,130,0.07)'
           }}

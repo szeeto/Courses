@@ -1,21 +1,20 @@
-import { Routes, Route, useLocation } from 'react-router-dom'
 
-import NavbarComponents from './components/NavbarComponents'
-import FooterComponents from './components/FooterComponents'
-
-
-import HomePage from './pages/HomePage'
-import Kelas from './pages/KelasPage'
-import SyaratKetenPage from './pages/SyaratKetenPage'
-import FaqPage from './pages/FaqPage'
-import TestimoniPage from './pages/TestimoniPage'
-import UserLoginPage from './pages/UserLoginPage.jsx'
-import AdminDashboard from './pages/AdminDashboard'
-import AdminProfilePage from './pages/adminPanel/AdminProfilePage'
-import UserSettings from './pages/UserSettings'
-import UserProfilePage from './pages/UserProfilePage'
-import ProtectedRoute from './components/ProtectedRoute'
-import UserRegisterForm from './components/UserRegisterForm'
+import { Routes, Route, useLocation } from 'react-router-dom';
+import './css/main.css';
+import NavbarComponents from './components/NavbarComponents';
+import FooterComponents from './components/FooterComponents';
+import HomePage from './pages/HomePage';
+import Kelas from './pages/KelasPage';
+import SyaratKetenPage from './pages/SyaratKetenPage';
+import FaqPage from './pages/FaqPage';
+import TestimoniPage from './pages/TestimoniPage';
+import UserLoginPage from './pages/UserLoginPage.jsx';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminProfilePage from './pages/adminPanel/AdminProfilePage';
+import UserSettings from './pages/UserSettings';
+import UserProfilePage from './pages/UserProfilePage';
+import ProtectedRoute from './components/ProtectedRoute';
+import UserRegisterForm from './components/UserRegisterForm';
 
 function App() {
   const location = useLocation()
