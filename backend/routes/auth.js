@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import jwt from 'jsonwebtoken'
 import { OAuth2Client } from 'google-auth-library'
-import { createOrUpdateUser, getUserById, pool } from '../db.js'
+import { createOrUpdateUser, getUserById, supabase } from '../db.js'
 import { env } from 'process'
 import bcrypt from 'bcrypt'
 
@@ -41,8 +41,8 @@ router.post('/register', async (req, res) => {
     }
 
     // Check if user already exists
-    const [existingUser] = await pool.query('SELECT id FROM users WHERE email = ?', [email])
-    if (existingUser.length > 0) {
+    const { data: existingUser } = await supabase.from('users').select('id').eq('email', email).single()
+    if (existingUser) {
       return res.status(400).json({ error: 'Email already registered' })
     }
 
@@ -50,13 +50,19 @@ router.post('/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10)
 
     // Create user
-    const [result] = await pool.query(
-      'INSERT INTO users (google_id, email, name, password, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())',
-      [`user_${Date.now()}`, email, name, hashedPassword]
-    )
+    const { data: newUser, error } = await supabase.from('users').insert({
+      google_id: `user_${Date.now()}`,
+      email,
+      name,
+      password: hashedPassword
+    }).select().single()
+    if (error) {
+      console.error('Insert user error:', error)
+      return res.status(500).json({ error: 'Failed to create user' })
+    }
 
-    const userId = result.insertId
-    const user = await getUserById(userId)
+    const userId = newUser.id
+    const user = newUser
 
     // Create JWT token
     const jwtToken = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, {
@@ -90,9 +96,13 @@ router.post('/login', async (req, res) => {
     }
 
     // Find user by email
-    const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email])
+    const { data: users, error } = await supabase.from('users').select('*').eq('email', email)
+    if (error) {
+      console.error('Select user error:', error)
+      return res.status(500).json({ error: 'Database error' })
+    }
     
-    if (users.length === 0) {
+    if (!users || users.length === 0) {
       return res.status(401).json({ error: 'Invalid email or password' })
     }
 
@@ -109,10 +119,10 @@ router.post('/login', async (req, res) => {
     }
 
     // Update last_login
-    await pool.query('UPDATE users SET last_login = NOW() WHERE id = ?', [user.id])
+    await supabase.from('users').update({ last_login: new Date().toISOString() }).eq('id', user.id)
     // Simpan riwayat login
     const ip = req.headers['x-forwarded-for'] || req.connection?.remoteAddress || '';
-    await pool.query('INSERT INTO login_history (user_id, ip_address) VALUES (?, ?)', [user.id, ip])
+    await supabase.from('login_history').insert({ user_id: user.id, ip_address: ip })
 
     // Create JWT token
     const jwtToken = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, {
@@ -161,14 +171,14 @@ router.post('/google-signin', async (req, res) => {
     let role = 'user';
     if (email === 'patrasawali93@gmail.com') {
       role = 'admin';
-      await pool.query('UPDATE users SET role = ? WHERE id = ?', [role, user.id]);
+      await supabase.from('users').update({ role }).eq('id', user.id);
     }
 
     // Update last_login
-    await pool.query('UPDATE users SET last_login = NOW() WHERE id = ?', [user.id]);
+    await supabase.from('users').update({ last_login: new Date().toISOString() }).eq('id', user.id);
     // Simpan riwayat login
     const ip = req.headers['x-forwarded-for'] || req.connection?.remoteAddress || '';
-    await pool.query('INSERT INTO login_history (user_id, ip_address) VALUES (?, ?)', [user.id, ip]);
+    await supabase.from('login_history').insert({ user_id: user.id, ip_address: ip });
 
     // Create JWT token
     const jwtToken = jwt.sign({ userId: user.id, email: user.email, role }, JWT_SECRET, {
@@ -216,17 +226,21 @@ router.put('/update-profile', verifyToken, async (req, res) => {
     }
 
     // Check if email is already taken by another user
-    const [existingUser] = await pool.query('SELECT id FROM users WHERE email = ? AND id != ?', [email, req.userId])
-    if (existingUser.length > 0) {
+    const { data: existingUser } = await supabase.from('users').select('id').eq('email', email).neq('id', req.userId)
+    if (existingUser && existingUser.length > 0) {
       return res.status(400).json({ error: 'Email already in use' })
     }
 
     // Update user
-    await pool.query('UPDATE users SET name = ?, email = ?, updated_at = NOW() WHERE id = ?', [
+    const { error } = await supabase.from('users').update({
       name,
       email,
-      req.userId,
-    ])
+      updated_at: new Date().toISOString()
+    }).eq('id', req.userId)
+    if (error) {
+      console.error('Update user error:', error)
+      return res.status(500).json({ error: 'Failed to update user' })
+    }
 
     // Get updated user
     const user = await getUserById(req.userId)
@@ -245,7 +259,11 @@ router.put('/update-profile', verifyToken, async (req, res) => {
 router.delete('/delete-account', verifyToken, async (req, res) => {
   try {
     // Delete user from database
-    await pool.query('DELETE FROM users WHERE id = ?', [req.userId])
+    const { error } = await supabase.from('users').delete().eq('id', req.userId)
+    if (error) {
+      console.error('Delete user error:', error)
+      return res.status(500).json({ error: 'Failed to delete account' })
+    }
     
     return res.json({
       ok: true,
@@ -299,9 +317,13 @@ router.post('/admin-login', async (req, res) => {
     }
 
     // Find user by email
-    const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email])
+    const { data: users, error } = await supabase.from('users').select('*').eq('email', email)
+    if (error) {
+      console.error('Select user error:', error)
+      return res.status(500).json({ error: 'Database error' })
+    }
     
-    if (users.length === 0) {
+    if (!users || users.length === 0) {
       return res.status(401).json({ error: 'Invalid email or password' })
     }
 
@@ -318,10 +340,10 @@ router.post('/admin-login', async (req, res) => {
     }
 
     // Update last_login
-    await pool.query('UPDATE users SET last_login = NOW() WHERE id = ?', [user.id])
+    await supabase.from('users').update({ last_login: new Date().toISOString() }).eq('id', user.id)
     // Simpan riwayat login
     const ip = req.headers['x-forwarded-for'] || req.connection?.remoteAddress || '';
-    await pool.query('INSERT INTO login_history (user_id, ip_address) VALUES (?, ?)', [user.id, ip])
+    await supabase.from('login_history').insert({ user_id: user.id, ip_address: ip })
 
     // Create JWT token
     const jwtToken = jwt.sign({ userId: user.id, email: user.email, role: 'user' }, JWT_SECRET, {
@@ -355,9 +377,13 @@ router.post('/user-login', async (req, res) => {
     }
 
     // Find user by email
-    const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email])
+    const { data: users, error } = await supabase.from('users').select('*').eq('email', email)
+    if (error) {
+      console.error('Select user error:', error)
+      return res.status(500).json({ error: 'Database error' })
+    }
     
-    if (users.length === 0) {
+    if (!users || users.length === 0) {
       return res.status(401).json({ error: 'Invalid email or password' })
     }
 
@@ -374,10 +400,10 @@ router.post('/user-login', async (req, res) => {
     }
 
     // Update last_login
-    await pool.query('UPDATE users SET last_login = NOW() WHERE id = ?', [user.id])
+    await supabase.from('users').update({ last_login: new Date().toISOString() }).eq('id', user.id)
     // Simpan riwayat login
     const ip = req.headers['x-forwarded-for'] || req.connection?.remoteAddress || '';
-    await pool.query('INSERT INTO login_history (user_id, ip_address) VALUES (?, ?)', [user.id, ip])
+    await supabase.from('login_history').insert({ user_id: user.id, ip_address: ip })
 
     // Create JWT token
     const jwtToken = jwt.sign({ userId: user.id, email: user.email, role: 'user' }, JWT_SECRET, {

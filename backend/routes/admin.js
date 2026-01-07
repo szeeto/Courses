@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { verifyToken } from './auth.js'
-import { getKelas, getTestimonial, getFaq, getUserById, pool } from '../db.js'
+import { getKelas, getTestimonial, getFaq, getUserById, supabase } from '../db.js'
 
 const router = Router()
 
@@ -45,14 +45,15 @@ router.post('/kelas', verifyToken, isAdmin, async (req, res) => {
   }
 
   try {
-    const [result] = await pool.query(
-      'INSERT INTO kelas (title, image, price) VALUES (?, ?, ?)',
-      [title, image, price]
-    )
+    const { data, error } = await supabase.from('kelas').insert({ title, image, price }).select().single()
+    if (error) {
+      console.error('Insert kelas error:', error)
+      return res.status(500).json({ error: 'Failed to create course' })
+    }
     res.json({
       ok: true,
       message: 'Course created',
-      id: result.insertId,
+      id: data.id,
     })
   } catch (err) {
     console.error('Create kelas error:', err)
@@ -66,12 +67,11 @@ router.put('/kelas/:id', verifyToken, isAdmin, async (req, res) => {
   const { title, image, price } = req.body
 
   try {
-    await pool.query('UPDATE kelas SET title = ?, image = ?, price = ? WHERE id = ?', [
-      title,
-      image,
-      price,
-      id,
-    ])
+    const { error } = await supabase.from('kelas').update({ title, image, price }).eq('id', id)
+    if (error) {
+      console.error('Update kelas error:', error)
+      return res.status(500).json({ error: 'Failed to update course' })
+    }
     res.json({ ok: true, message: 'Course updated' })
   } catch (err) {
     console.error('Update kelas error:', err)
@@ -84,7 +84,11 @@ router.delete('/kelas/:id', verifyToken, isAdmin, async (req, res) => {
   const { id } = req.params
 
   try {
-    await pool.query('DELETE FROM kelas WHERE id = ?', [id])
+    const { error } = await supabase.from('kelas').delete().eq('id', id)
+    if (error) {
+      console.error('Delete kelas error:', error)
+      return res.status(500).json({ error: 'Failed to delete course' })
+    }
     res.json({ ok: true, message: 'Course deleted' })
   } catch (err) {
     console.error('Delete kelas error:', err)
@@ -113,14 +117,15 @@ router.post('/testimonial', verifyToken, isAdmin, async (req, res) => {
   }
 
   try {
-    const [result] = await pool.query(
-      'INSERT INTO testimonial (name, skill, `desc`, image) VALUES (?, ?, ?, ?)',
-      [name, skill, desc, image]
-    )
+    const { data, error } = await supabase.from('testimonial').insert({ name, skill, desc, image }).select().single()
+    if (error) {
+      console.error('Insert testimonial error:', error)
+      return res.status(500).json({ error: 'Failed to create testimonial' })
+    }
     res.json({
       ok: true,
       message: 'Testimonial created',
-      id: result.insertId,
+      id: data.id,
     })
   } catch (err) {
     console.error('Create testimonial error:', err)
@@ -134,10 +139,11 @@ router.put('/testimonial/:id', verifyToken, isAdmin, async (req, res) => {
   const { name, skill, desc, image } = req.body
 
   try {
-    await pool.query(
-      'UPDATE testimonial SET name = ?, skill = ?, `desc` = ?, image = ? WHERE id = ?',
-      [name, skill, desc, image, id]
-    )
+    const { error } = await supabase.from('testimonial').update({ name, skill, desc, image }).eq('id', id)
+    if (error) {
+      console.error('Update testimonial error:', error)
+      return res.status(500).json({ error: 'Failed to update testimonial' })
+    }
     res.json({ ok: true, message: 'Testimonial updated' })
   } catch (err) {
     console.error('Update testimonial error:', err)
@@ -150,7 +156,11 @@ router.delete('/testimonial/:id', verifyToken, isAdmin, async (req, res) => {
   const { id } = req.params
 
   try {
-    await pool.query('DELETE FROM testimonial WHERE id = ?', [id])
+    const { error } = await supabase.from('testimonial').delete().eq('id', id)
+    if (error) {
+      console.error('Delete testimonial error:', error)
+      return res.status(500).json({ error: 'Failed to delete testimonial' })
+    }
     res.json({ ok: true, message: 'Testimonial deleted' })
   } catch (err) {
     console.error('Delete testimonial error:', err)
@@ -180,7 +190,11 @@ router.post('/faq', verifyToken, isAdmin, async (req, res) => {
 
   try {
     const id = `faq-${Date.now()}`
-    await pool.query('INSERT INTO faq (id, title, `desc`) VALUES (?, ?, ?)', [id, title, desc])
+    const { error } = await supabase.from('faq').insert({ id, title, desc })
+    if (error) {
+      console.error('Insert FAQ error:', error)
+      return res.status(500).json({ error: 'Failed to create FAQ' })
+    }
     res.json({
       ok: true,
       message: 'FAQ created',
@@ -198,7 +212,11 @@ router.put('/faq/:id', verifyToken, isAdmin, async (req, res) => {
   const { title, desc } = req.body
 
   try {
-    await pool.query('UPDATE faq SET title = ?, `desc` = ? WHERE id = ?', [title, desc, id])
+    const { error } = await supabase.from('faq').update({ title, desc }).eq('id', id)
+    if (error) {
+      console.error('Update FAQ error:', error)
+      return res.status(500).json({ error: 'Failed to update FAQ' })
+    }
     res.json({ ok: true, message: 'FAQ updated' })
   } catch (err) {
     console.error('Update FAQ error:', err)
@@ -211,7 +229,11 @@ router.delete('/faq/:id', verifyToken, isAdmin, async (req, res) => {
   const { id } = req.params
 
   try {
-    await pool.query('DELETE FROM faq WHERE id = ?', [id])
+    const { error } = await supabase.from('faq').delete().eq('id', id)
+    if (error) {
+      console.error('Delete FAQ error:', error)
+      return res.status(500).json({ error: 'Failed to delete FAQ' })
+    }
     res.json({ ok: true, message: 'FAQ deleted' })
   } catch (err) {
     console.error('Delete FAQ error:', err)
@@ -224,7 +246,11 @@ router.delete('/faq/:id', verifyToken, isAdmin, async (req, res) => {
 // GET all users (admin only)
 router.get('/users', verifyToken, isAdmin, async (req, res) => {
   try {
-    const [users] = await pool.query('SELECT id, email, name, picture, created_at FROM users ORDER BY created_at DESC')
+    const { data: users, error } = await supabase.from('users').select('id, email, name, picture, created_at').order('created_at', { ascending: false })
+    if (error) {
+      console.error('Get users error:', error)
+      return res.status(500).json({ error: 'Failed to fetch users' })
+    }
     res.json({ ok: true, data: users })
   } catch (err) {
     console.error('Get users error:', err)
@@ -252,7 +278,11 @@ router.get('/users/:id', verifyToken, isAdmin, async (req, res) => {
 // GET all subscribers (admin only)
 router.get('/subscribers', verifyToken, isAdmin, async (req, res) => {
   try {
-    const [subscribers] = await pool.query('SELECT * FROM subscribers ORDER BY date DESC')
+    const { data: subscribers, error } = await supabase.from('subscribers').select('*').order('date', { ascending: false })
+    if (error) {
+      console.error('Get subscribers error:', error)
+      return res.status(500).json({ error: 'Failed to fetch subscribers' })
+    }
     res.json({ ok: true, data: subscribers })
   } catch (err) {
     console.error('Get subscribers error:', err)
@@ -265,7 +295,11 @@ router.delete('/subscribers/:id', verifyToken, isAdmin, async (req, res) => {
   const { id } = req.params
 
   try {
-    await pool.query('DELETE FROM subscribers WHERE id = ?', [id])
+    const { error } = await supabase.from('subscribers').delete().eq('id', id)
+    if (error) {
+      console.error('Delete subscriber error:', error)
+      return res.status(500).json({ error: 'Failed to remove subscriber' })
+    }
     res.json({ ok: true, message: 'Subscriber removed' })
   } catch (err) {
     console.error('Delete subscriber error:', err)
@@ -278,20 +312,25 @@ router.delete('/subscribers/:id', verifyToken, isAdmin, async (req, res) => {
 // GET dashboard stats (admin only)
 router.get('/stats', verifyToken, isAdmin, async (req, res) => {
   try {
-    const [kelasCount] = await pool.query('SELECT COUNT(*) as count FROM kelas')
-    const [testimoniCount] = await pool.query('SELECT COUNT(*) as count FROM testimonial')
-    const [faqCount] = await pool.query('SELECT COUNT(*) as count FROM faq')
-    const [usersCount] = await pool.query('SELECT COUNT(*) as count FROM users')
-    const [subscribersCount] = await pool.query('SELECT COUNT(*) as count FROM subscribers')
+    const { count: kelasCount, error: kelasError } = await supabase.from('kelas').select('*', { count: 'exact', head: true })
+    const { count: testimoniCount, error: testimoniError } = await supabase.from('testimonial').select('*', { count: 'exact', head: true })
+    const { count: faqCount, error: faqError } = await supabase.from('faq').select('*', { count: 'exact', head: true })
+    const { count: usersCount, error: usersError } = await supabase.from('users').select('*', { count: 'exact', head: true })
+    const { count: subscribersCount, error: subscribersError } = await supabase.from('subscribers').select('*', { count: 'exact', head: true })
+
+    if (kelasError || testimoniError || faqError || usersError || subscribersError) {
+      console.error('Stats error:', { kelasError, testimoniError, faqError, usersError, subscribersError })
+      return res.status(500).json({ error: 'Failed to fetch stats' })
+    }
 
     res.json({
       ok: true,
       data: {
-        courses: kelasCount[0].count,
-        testimonials: testimoniCount[0].count,
-        faqs: faqCount[0].count,
-        users: usersCount[0].count,
-        subscribers: subscribersCount[0].count,
+        courses: kelasCount,
+        testimonials: testimoniCount,
+        faqs: faqCount,
+        users: usersCount,
+        subscribers: subscribersCount,
       },
     })
   } catch (err) {
