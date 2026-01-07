@@ -10,7 +10,7 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 dotenv.config({ path: path.resolve(__dirname, '../.env') })
 
-const DATA_JSON = path.resolve('./backend/data/data.json')
+const DATA_JSON = path.resolve(__dirname, 'data/data.json')
 
 const SUPABASE_URL = env.SUPABASE_URL
 const SUPABASE_ANON_KEY = env.SUPABASE_ANON_KEY
@@ -36,22 +36,28 @@ export async function initDB(){
     const parsed = JSON.parse(raw)
 
     // Check and seed kelas
-    const { data: kelasData } = await supabase.from('kelas').select('id').limit(1)
-    if(kelasData.length === 0 && Array.isArray(parsed.kelas)){
+    const { data: kelasData, error: kelasError } = await supabase.from('kelas').select('id').limit(1)
+    if (kelasError) {
+      console.error('Error checking kelas:', kelasError)
+    } else if (kelasData && kelasData.length === 0 && Array.isArray(parsed.kelas)){
       const { error } = await supabase.from('kelas').insert(parsed.kelas)
       if (error) console.error('Error seeding kelas:', error)
     }
 
     // Check and seed testimonial
-    const { data: testimonialData } = await supabase.from('testimonial').select('id').limit(1)
-    if(testimonialData.length === 0 && Array.isArray(parsed.testimonial)){
+    const { data: testimonialData, error: testimonialError } = await supabase.from('testimonial').select('id').limit(1)
+    if (testimonialError) {
+      console.error('Error checking testimonial:', testimonialError)
+    } else if (testimonialData && testimonialData.length === 0 && Array.isArray(parsed.testimonial)){
       const { error } = await supabase.from('testimonial').insert(parsed.testimonial)
       if (error) console.error('Error seeding testimonial:', error)
     }
 
     // Check and seed faq
-    const { data: faqData } = await supabase.from('faq').select('id').limit(1)
-    if(faqData.length === 0 && Array.isArray(parsed.faq)){
+    const { data: faqData, error: faqError } = await supabase.from('faq').select('id').limit(1)
+    if (faqError) {
+      console.error('Error checking faq:', faqError)
+    } else if (faqData && faqData.length === 0 && Array.isArray(parsed.faq)){
       const { error } = await supabase.from('faq').insert(parsed.faq)
       if (error) console.error('Error seeding faq:', error)
     }

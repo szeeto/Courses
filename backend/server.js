@@ -10,7 +10,7 @@ import { initDB } from './db.js'
 import { env, exit } from 'process'
 
 const app = express()
-const PORT = env.PORT ?? 4000
+const PORT = env.PORT ?? 4001
 
 // CORS configuration for Vercel and local development
 const allowedOrigins = [
