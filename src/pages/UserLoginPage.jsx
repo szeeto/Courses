@@ -1,97 +1,50 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSupabaseAuth } from '../hooks/useSupabaseAuth';
 import './UserLoginPage.split.css';
 
 function UserLoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
+  const { signIn, signInWithGoogle, loading } = useSupabaseAuth();
 
-  // Google Sign-In callback
-  useEffect(() => {
-    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID';
-    const handleGoogleResponse = async (response) => {
-      setLoading(true);
-      setError('');
-      setSuccess('');
-      try {
-        if (!response.credential) {
-          setError('Google credential tidak ditemukan');
-          setLoading(false);
-          return;
-        }
-        const res = await fetch('http://localhost:4000/auth/google-signin', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token: response.credential }),
-        });
-        const data = await res.json();
-        if (data.ok && data.token && data.user) {
-          localStorage.setItem('authToken', data.token);
-          localStorage.setItem('user', JSON.stringify(data.user));
-          setSuccess('Login sukses!');
-          if (data.user.role === 'admin') {
-            navigate('/admin');
-          } else {
-            navigate('/');
-          }
-        } else {
-          setError(data.error || 'Google login failed');
-        }
-      } catch (err) {
-        setError('Google login error: ' + err.message);
-      }
-      setLoading(false);
-    };
-    if (window.google) {
-      window.google.accounts.id.initialize({
-        client_id: clientId,
-        callback: handleGoogleResponse,
-      });
-      window.google.accounts.id.renderButton(
-        document.getElementById('google-login-btn'),
-        { theme: 'outline', size: 'large' }
-      );
+  // Google Sign-In handler
+  const handleGoogleLogin = async () => {
+    setError('');
+    setSuccess('');
+    const result = await signInWithGoogle();
+    if (result.success) {
+      setSuccess('Login sukses!');
+      setTimeout(() => navigate('/'), 1200);
+    } else {
+      setError(result.error || 'Google login gagal');
     }
-  }, [navigate]);
+  };
 
   // Email login handler
   const handleLogin = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
     setSuccess('');
     try {
       if (!email.match(/^[^@\s]+@[^@\s]+\.[^@\s]+$/)) throw new Error('Email tidak valid');
       if (!password || password.length < 6) throw new Error('Password minimal 6 karakter');
 
-      const res = await fetch('http://localhost:4000/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      const data = await res.json();
-      if (data.ok && data.token && data.user) {
-        localStorage.setItem('authToken', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+      const result = await signIn(email, password);
+      if (result.success) {
         setSuccess('Login sukses!');
-        if (data.user.role === 'admin') {
-          setTimeout(() => navigate('/admin'), 1200);
-        } else {
-          setTimeout(() => navigate('/', 1200));
-        }
+        setTimeout(() => navigate('/'), 1200);
       } else {
-        setError(data.error || 'Email atau password salah');
+        setError(result.error || 'Email atau password salah');
       }
     } catch (err) {
       setError(err.message);
     }
-    setLoading(false);
   };
 
   return (
@@ -100,7 +53,14 @@ function UserLoginPage() {
         <div className="login-modern-header">
           <h2 className="login-modern-title">Form Login</h2>
         </div>
-        <div id="google-login-btn" className="google-login-btn-modern"></div>
+        <button 
+          className="login-modern-btn" 
+          onClick={handleGoogleLogin}
+          disabled={loading}
+          style={{marginBottom: '16px'}}
+        >
+          {loading ? 'Memproses...' : '🔗 Login dengan Google'}
+        </button>
         <div className="login-modern-or">atau login dengan email</div>
         <form className="login-modern-form" onSubmit={handleLogin}>
           <input

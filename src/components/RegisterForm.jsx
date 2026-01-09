@@ -1,162 +1,256 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { setCookie } from '../utils/cookieUtils'
-import './AuthForm.css'
+import { useSupabaseAuth } from '../hooks/useSupabaseAuth'
+import { getCookie } from '../utils/cookieUtils'
+import '../pages/RegisterPage.css'
 
 function RegisterForm() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [agreeTerms, setAgreeTerms] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [fieldErrors, setFieldErrors] = useState({})
+  const [passwordStrength, setPasswordStrength] = useState({
+    minLength: false,
+    hasUpperCase: false,
+    hasLowerCase: false,
+    hasNumber: false,
+  })
+
   const navigate = useNavigate()
+  const { signUp, loading } = useSupabaseAuth()
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const token = getCookie('authToken') || localStorage.getItem('authToken')
+    if (token) {
+      navigate('/', { replace: true })
+    }
+  }, [navigate])
+
+  // Check password strength
+  useEffect(() => {
+    setPasswordStrength({
+      minLength: password.length >= 8,
+      hasUpperCase: /[A-Z]/.test(password),
+      hasLowerCase: /[a-z]/.test(password),
+      hasNumber: /[0-9]/.test(password),
+    })
+  }, [password])
 
   const validateForm = () => {
-    if (!name.trim()) throw new Error('Nama harus diisi')
-    if (!email.trim()) throw new Error('Email harus diisi')
-    if (!password) throw new Error('Kata sandi harus diisi')
-    if (password.length < 6) throw new Error('Kata sandi minimal 6 karakter')
-    if (password !== confirmPassword) throw new Error('Kata sandi tidak cocok')
-    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) throw new Error('Email tidak valid')
+    const errors = {}
+
+    if (!name.trim()) {
+      errors.name = 'Nama wajib diisi'
+    } else if (name.trim().length < 2) {
+      errors.name = 'Nama minimal 2 karakter'
+    }
+
+    if (!email.trim()) {
+      errors.email = 'Email wajib diisi'
+    } else if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      errors.email = 'Format email tidak valid'
+    }
+
+    if (!password) {
+      errors.password = 'Password wajib diisi'
+    } else if (password.length < 8) {
+      errors.password = 'Password minimal 8 karakter'
+    } else if (!/[A-Z]/.test(password)) {
+      errors.password = 'Password harus mengandung huruf besar'
+    } else if (!/[a-z]/.test(password)) {
+      errors.password = 'Password harus mengandung huruf kecil'
+    } else if (!/[0-9]/.test(password)) {
+      errors.password = 'Password harus mengandung angka'
+    }
+
+    if (!confirmPassword) {
+      errors.confirmPassword = 'Konfirmasi password wajib diisi'
+    } else if (password !== confirmPassword) {
+      errors.confirmPassword = 'Password tidak cocok'
+    }
+
+    if (!agreeTerms) {
+      errors.terms = 'Anda harus setuju dengan syarat dan ketentuan'
+    }
+
+    setFieldErrors(errors)
+    return Object.keys(errors).length === 0
   }
 
   const handleRegister = async (e) => {
     e.preventDefault()
-    setLoading(true)
     setError('')
     setSuccess('')
 
+    if (!validateForm()) {
+      return
+    }
+
     try {
-      validateForm()
-
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || window.location.origin
-
-      const response = await fetch(`${backendUrl}/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
+      const result = await signUp(email.trim(), password, {
+        full_name: name.trim(),
       })
 
-      if (!response.ok) {
-        try {
-          const errorData = await response.json()
-          throw new Error(errorData.error || 'Pendaftaran gagal')
-        } catch (err) {
-          if (err instanceof SyntaxError) {
-            throw new Error(`Server error: ${response.status} ${response.statusText}`)
-          }
-          throw err
-        }
+      if (result.success) {
+        setSuccess('✓ Registrasi berhasil! Silakan cek email Anda untuk verifikasi.')
+        setName('')
+        setEmail('')
+        setPassword('')
+        setConfirmPassword('')
+        setAgreeTerms(false)
+        setTimeout(() => navigate('/login/user'), 2000)
+      } else {
+        setError(result.error || 'Registrasi gagal. Silakan coba lagi.')
       }
-
-      const data = await response.json()
-
-      // Save to localStorage and cookies
-      localStorage.setItem('authToken', data.token)
-      localStorage.setItem('user', JSON.stringify(data.user))
-      setCookie('authToken', data.token, 30)
-      setCookie('userInfo', JSON.stringify(data.user), 30)
-      setCookie('userEmail', data.user.email, 30)
-
-      setSuccess('Pendaftaran berhasil! Mengalihkan...')
-      setTimeout(() => navigate('/', { replace: true }), 1500)
     } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
+      setError(err.message || 'Terjadi kesalahan. Silakan coba lagi.')
     }
   }
 
-  return (
-    <div className="auth-form-container">
-      <div className="auth-form">
-        <h2>Daftar</h2>
-        <p className="auth-subtitle">Buat akun baru Anda</p>
+  const isPasswordValid = Object.values(passwordStrength).every(v => v)
+  const isFormValid = name && email && isPasswordValid && confirmPassword === password && agreeTerms && !loading
 
-        {error && <div className="alert alert-danger">{error}</div>}
+  return (
+    <div className="register-container">
+      <div className="register-card">
+        <div className="register-header">
+          <h1>Daftar Akun</h1>
+          <p>Buat akun baru untuk mengakses kursus kami</p>
+        </div>
+
+        {error && <div className="alert alert-error">{error}</div>}
         {success && <div className="alert alert-success">{success}</div>}
 
-        <form onSubmit={handleRegister}>
+        <form className="register-form" onSubmit={handleRegister}>
           <div className="form-group">
             <label htmlFor="name">Nama Lengkap</label>
             <input
-              type="text"
               id="name"
-              placeholder="Masukkan nama lengkap"
+              type="text"
+              placeholder="Masukkan nama lengkap Anda"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value)
+                if (fieldErrors.name) setFieldErrors({ ...fieldErrors, name: '' })
+              }}
               disabled={loading}
+              style={{ borderColor: fieldErrors.name ? '#c53030' : undefined }}
             />
+            {fieldErrors.name && <span style={{ color: '#c53030', fontSize: '0.85rem' }}>⚠ {fieldErrors.name}</span>}
           </div>
 
           <div className="form-group">
             <label htmlFor="email">Email</label>
             <input
-              type="email"
               id="email"
+              type="email"
               placeholder="Masukkan email Anda"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value)
+                if (fieldErrors.email) setFieldErrors({ ...fieldErrors, email: '' })
+              }}
               disabled={loading}
+              style={{ borderColor: fieldErrors.email ? '#c53030' : undefined }}
             />
+            {fieldErrors.email && <span style={{ color: '#c53030', fontSize: '0.85rem' }}>⚠ {fieldErrors.email}</span>}
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Kata Sandi</label>
-            <div className="password-input-group">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                id="password"
-                placeholder="Minimal 6 karakter"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={loading}
-              />
-              <button
-                type="button"
-                className="toggle-password"
-                onClick={() => setShowPassword(!showPassword)}
-                disabled={loading}
-              >
-                {showPassword ? '👁️' : '👁️‍🗨️'}
-              </button>
-            </div>
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              placeholder="Masukkan password yang kuat"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value)
+                if (fieldErrors.password) setFieldErrors({ ...fieldErrors, password: '' })
+              }}
+              disabled={loading}
+              style={{ borderColor: fieldErrors.password ? '#c53030' : undefined }}
+            />
+            {fieldErrors.password && (
+              <span style={{ color: '#c53030', fontSize: '0.85rem' }}>⚠ {fieldErrors.password}</span>
+            )}
+
+            {password && (
+              <div className="password-requirements">
+                <p style={{ margin: '0 0 8px 0', fontWeight: 500 }}>Persyaratan password:</p>
+                <div style={{ color: passwordStrength.minLength ? '#38a169' : '#718096' }} className="requirement-item">
+                  Minimal 8 karakter
+                </div>
+                <div style={{ color: passwordStrength.hasUpperCase ? '#38a169' : '#718096' }} className="requirement-item">
+                  Mengandung huruf besar (A-Z)
+                </div>
+                <div style={{ color: passwordStrength.hasLowerCase ? '#38a169' : '#718096' }} className="requirement-item">
+                  Mengandung huruf kecil (a-z)
+                </div>
+                <div style={{ color: passwordStrength.hasNumber ? '#38a169' : '#718096' }} className="requirement-item">
+                  Mengandung angka (0-9)
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="form-group">
-            <label htmlFor="confirmPassword">Konfirmasi Kata Sandi</label>
-            <div className="password-input-group">
-              <input
-                type={showConfirmPassword ? 'text' : 'password'}
-                id="confirmPassword"
-                placeholder="Ulangi kata sandi"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                disabled={loading}
-              />
-              <button
-                type="button"
-                className="toggle-password"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                disabled={loading}
-              >
-                {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
-              </button>
-            </div>
+            <label htmlFor="confirmPassword">Konfirmasi Password</label>
+            <input
+              id="confirmPassword"
+              type="password"
+              placeholder="Konfirmasi password Anda"
+              value={confirmPassword}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value)
+                if (fieldErrors.confirmPassword) setFieldErrors({ ...fieldErrors, confirmPassword: '' })
+              }}
+              disabled={loading}
+              style={{ borderColor: fieldErrors.confirmPassword ? '#c53030' : undefined }}
+            />
+            {fieldErrors.confirmPassword && (
+              <span style={{ color: '#c53030', fontSize: '0.85rem' }}>⚠ {fieldErrors.confirmPassword}</span>
+            )}
           </div>
 
-          <button type="submit" className="btn-submit" disabled={loading}>
-            {loading ? 'Memproses...' : 'Daftar'}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '8px' }}>
+            <input
+              id="terms"
+              type="checkbox"
+              checked={agreeTerms}
+              onChange={(e) => {
+                setAgreeTerms(e.target.checked)
+                if (fieldErrors.terms) setFieldErrors({ ...fieldErrors, terms: '' })
+              }}
+              disabled={loading}
+              style={{ marginTop: '4px', cursor: 'pointer', width: '18px', height: '18px' }}
+            />
+            <label htmlFor="terms" style={{ cursor: 'pointer', fontSize: '0.9rem', margin: 0 }}>
+              Saya setuju dengan Syarat & Ketentuan dan Kebijakan Privasi
+            </label>
+          </div>
+          {fieldErrors.terms && <span style={{ color: '#c53030', fontSize: '0.85rem', marginTop: '8px' }}>⚠ {fieldErrors.terms}</span>}
+
+          <button
+            className="register-btn"
+            type="submit"
+            disabled={!isFormValid || loading}
+            style={{
+              opacity: !isFormValid || loading ? 0.6 : 1,
+              cursor: !isFormValid || loading ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {loading ? 'Sedang mendaftar...' : 'Daftar Sekarang'}
           </button>
         </form>
 
-        <p className="auth-link">
-          Sudah punya akun? <a href="/login" onClick={(e) => { e.preventDefault(); navigate('/login'); }}>Masuk di sini</a>
-        </p>
+        <div className="register-footer">
+          Sudah memiliki akun? <a href="/login/user" style={{ textDecoration: 'none' }}>Login di sini</a>
+        </div>
       </div>
     </div>
   )

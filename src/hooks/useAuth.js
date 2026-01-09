@@ -1,66 +1,36 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useSupabaseAuth } from './useSupabaseAuth'
 
 /**
- * useAuth Hook - Manage authentication state
+ * useAuth Hook - Manage authentication state (Legacy for backward compatibility)
+ * Now uses Supabase Auth
  * 
  * Usage:
  * const { user, token, isLoggedIn, logout, checkAuth } = useAuth()
  */
 export function useAuth() {
+  const supabaseAuth = useSupabaseAuth()
   const [user, setUser] = useState(null)
   const [token, setToken] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  // Check if user is logged in on mount
+  // Sync with Supabase auth state
   useEffect(() => {
-    const savedToken = localStorage.getItem('authToken')
-    const savedUser = localStorage.getItem('user')
-    
-    if (savedToken && savedUser) {
-      setToken(savedToken)
-      setUser(JSON.parse(savedUser))
-    }
-    setLoading(false)
-  }, [])
-
-  const verifyToken = useCallback(async (authToken) => {
-    try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000'
-      const response = await fetch(`${backendUrl}/auth/me`, {
-        headers: {
-          'Authorization': `Bearer ${authToken}`
-        }
-      })
-      
-      if (!response.ok) {
-        localStorage.removeItem('authToken')
-        localStorage.removeItem('user')
-        setToken(null)
-        setUser(null)
-        return false
-      }
-      
-      const data = await response.json()
-      setUser(data.data || data.user)
-      return true
-    } catch (err) {
-      console.error('Token verification failed:', err)
-      localStorage.removeItem('authToken')
-      localStorage.removeItem('user')
-      setToken(null)
+    if (supabaseAuth.user && supabaseAuth.session) {
+      setUser(supabaseAuth.user)
+      setToken(supabaseAuth.session.access_token)
+    } else {
       setUser(null)
-      return false
+      setToken(null)
     }
-  }, [])
+    setLoading(supabaseAuth.loading)
+    setError(supabaseAuth.error)
+  }, [supabaseAuth.user, supabaseAuth.session, supabaseAuth.loading, supabaseAuth.error])
 
-  const logout = useCallback(() => {
-    localStorage.removeItem('authToken')
-    localStorage.removeItem('user')
-    setToken(null)
-    setUser(null)
-    setError(null)
-  }, [])
+  const logout = useCallback(async () => {
+    await supabaseAuth.signOut()
+  }, [supabaseAuth])
 
   const isLoggedIn = !!token && !!user
 
@@ -71,7 +41,6 @@ export function useAuth() {
     loading,
     error,
     logout,
-    verifyToken,
     setUser,
     setToken,
   }
