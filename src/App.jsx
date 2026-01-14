@@ -8,24 +8,15 @@ import Kelas from './pages/KelasPage';
 import SyaratKetenPage from './pages/SyaratKetenPage';
 import FaqPage from './pages/FaqPage';
 import TestimoniPage from './pages/TestimoniPage';
-import UserLoginPage from './pages/UserLoginPage.jsx';
-import AdminDashboard from './pages/AdminDashboard';
-import AdminProfilePage from './pages/adminPanel/AdminProfilePage';
-import UserSettings from './pages/UserSettings';
-import UserProfilePage from './pages/UserProfilePage';
-import ProtectedRoute from './components/ProtectedRoute';
-import UserRegisterForm from './components/UserRegisterForm';
+import UserLoginPage from './pages/UserLoginPage';
+import RegisterPage from './pages/RegisterPage';
 
 function App() {
   const location = useLocation()
-  const isLoginPage = location.pathname === '/login'
-  const isAdminPage = location.pathname === '/admin'
-  const isSettingsPage = location.pathname === '/settings'
-  const isAdminProfilePage = location.pathname === '/adminPanel/profile'
 
   return (
     <div>
-      {!isLoginPage && !isSettingsPage && !isAdminPage && !isAdminProfilePage && <NavbarComponents />}
+      <NavbarComponents />
       <div>
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -34,32 +25,10 @@ function App() {
           <Route path="/faq" element={<FaqPage />} />
           <Route path="/syaratketen" element={<SyaratKetenPage />} />
           <Route path="/login" element={<UserLoginPage />} />
-          {/* Route admin hanya untuk admin */}
-          <Route path="/admin" element={
-            <ProtectedRoute role="admin">
-              <AdminDashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/adminPanel/profile" element={
-            <ProtectedRoute role="admin">
-              <AdminProfilePage />
-            </ProtectedRoute>
-          } />
-          {/* Route user hanya untuk user */}
-          <Route path="/settings" element={
-            <ProtectedRoute role="user">
-              <UserSettings />
-            </ProtectedRoute>
-          } />
-          <Route path="/profile" element={
-            <ProtectedRoute role="user">
-              <UserProfilePage />
-            </ProtectedRoute>
-          } />
-          <Route path="/register" element={<UserRegisterForm />} />
+          <Route path="/register" element={<RegisterPage />} />
         </Routes>
       </div>
-      {!isLoginPage && !isAdminPage && !isSettingsPage && !isAdminProfilePage && <FooterComponents />}
+      <FooterComponents />
     </div>
   )
 }

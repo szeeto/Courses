@@ -1,66 +1,77 @@
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import rateLimit from 'express-rate-limit';
+import { createClient } from '@supabase/supabase-js';
 
-/* eslint-env node */
-import express from 'express'
-import cors from 'cors'
-import path from 'path'
-import apiRouter from './routes/api.js'
-import authRouter from './routes/auth.js'
-import adminRouter from './routes/admin.js'
-import { initDB } from './db.js'
-import { env, exit } from 'process'
+// Import routes
+import authRoutes from './routes/auth.js';
+import apiRoutes from './routes/api.js';
+import adminRoutes from './routes/admin.js';
 
-const app = express()
-const PORT = env.PORT ?? 4001
+dotenv.config();
 
-// CORS configuration for Vercel and local development
-const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:5173',
-  'http://127.0.0.1:5173',
-  'http://127.0.0.1:3000',
-  env.FRONTEND_URL || 'http://localhost:5173',
-  // Add your Vercel frontend domain
-  ...(env.VERCEL_URL ? [`https://${env.VERCEL_URL}`] : []),
-]
+const app = express();
+const PORT = process.env.PORT || 4000;
 
-const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true)
-    } else {
-      console.warn(`CORS blocked request from origin: ${origin}`)
-      callback(null, true) // Allow for now, log for debugging
+// Supabase client
+export const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
     }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}
-
-app.use(cors(corsOptions))
-app.use(express.json())
-
-// Initialize DB then mount routes and start server
-;(async () => {
-  try {
-    await initDB()
-    app.use('/api', apiRouter)
-    app.use('/auth', authRouter)
-    app.use('/admin', adminRouter)
-
-    app.get('/', (req, res) => {
-      res.send({ status: 'ok', message: 'Courses backend is running' })
-    })
-
-    
-  // Serve profile pictures statically
-  app.use('/profile_pics', express.static(path.resolve('./public/profile_pics')))
-    app.listen(PORT, () => {
-      console.log(`Backend listening on http://localhost:${PORT}`)
-    })
-  } catch (err) {
-    console.error('Failed to initialize DB', err)
-    exit(1)
   }
-})()
+);
+
+// Middleware
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true
+}));
+
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.'
+});
+app.use('/api/', limiter);
+
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api', apiRoutes);
+app.use('/api/admin', adminRoutes);
+
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'OK', message: 'Backend is running' });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    success: false,
+    message: 'Something went wrong!',
+    error: process.env.NODE_ENV === 'development' ? err.message : {}
+  });
+});
+
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found'
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📱 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
+});

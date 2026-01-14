@@ -1,16 +1,12 @@
 import { Navbar, Container, Nav } from 'react-bootstrap'
 import { NavLink } from 'react-router-dom'
 import { navLinks } from "../data/index.js"
-import { useState, useEffect, useMemo } from 'react'
-import UserDropdown from './UserDropdown'
+import { useState, useEffect } from 'react'
+import { useSupabaseAuth } from '../hooks/useSupabaseAuth'
 
 const NavbarComponents = () => {
   const [changeColor, setChangeColor] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [userName, setUserName] = useState('')
-  const [isAdmin, setIsAdmin] = useState(false)
-
-  const ADMIN_EMAILS = useMemo(() => ['patrasawali93@gmail.com'], [])
+  const { user, isLoggedIn, signOut } = useSupabaseAuth()
 
   const changeBackgroundColor = () => {
     if (window.scrollY > 10) {
@@ -24,25 +20,12 @@ const NavbarComponents = () => {
     changeBackgroundColor()
     window.addEventListener('scroll', changeBackgroundColor)
 
-    // Check if user is logged in
-    const token = localStorage.getItem('authToken')
-    const user = localStorage.getItem('user')
-    if (token && user) {
-      setIsLoggedIn(true)
-      try {
-        const userData = JSON.parse(user)
-        setUserName(userData.name || 'User')
-        // Check if user is admin
-        if (userData.role === 'admin' || ADMIN_EMAILS.includes(userData.email)) {
-          setIsAdmin(true)
-        }
-      } catch (e) {
-        console.error('Error parsing user data:', e)
-      }
-    }
-
     return () => window.removeEventListener('scroll', changeBackgroundColor)
-  }, [ADMIN_EMAILS])
+  }, [])
+
+  const handleLogout = async () => {
+    await signOut()
+  }
 
   return (
     <Navbar expand="lg" className={changeColor ? 'color-active' : ''}>
@@ -63,9 +46,19 @@ const NavbarComponents = () => {
           </Nav>
           <div className='text-center d-flex gap-2 justify-content-center'>
             {isLoggedIn ? (
-              <UserDropdown userName={userName} isAdmin={isAdmin} />
+              <div className="d-flex align-items-center gap-2">
+                <span className="text-light">Halo, {user?.name || 'User'}</span>
+                <button
+                  className="btn btn-outline-light rounded-1"
+                  onClick={handleLogout}
+                >
+                  Logout
+                </button>
+              </div>
             ) : (
-             <NavLink to="/login" className="btn btn-outline-danger rounded-1">Login</NavLink>
+              <NavLink to="/login" className="btn btn-outline-danger rounded-1">
+                Login
+              </NavLink>
             )}
           </div>
         </Navbar.Collapse>
