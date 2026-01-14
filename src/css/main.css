@@ -25,18 +25,16 @@
 
 .navbar {
     position: fixed;
-    padding: 12px 0;
+    padding: 20px 0;
     width: 100%;
     transition: all 0.3s ease;
     z-index: 9999;
-    animation: FadeInDown 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-    will-change: transform, opacity;
-    background-color: transparent;
+    background-color: var(--navbar-color);
 }
 
 .navbar.color-active {
     background-color: var(--navbar-color);
-    padding: 18px 0;
+    padding: 25px 0;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     border-bottom: 2px solid #dc35469c;
 }

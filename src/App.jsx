@@ -14,21 +14,21 @@ import RegisterPage from './pages/RegisterPage';
 function App() {
   const location = useLocation()
 
+  const hideNavAndFooter = location.pathname === '/login' || location.pathname === '/register'
+
   return (
     <div>
-      <NavbarComponents />
-      <div>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/kelas" element={<Kelas />} />
-          <Route path="/testimoni" element={<TestimoniPage />} />
-          <Route path="/faq" element={<FaqPage />} />
-          <Route path="/syaratketen" element={<SyaratKetenPage />} />
-          <Route path="/login" element={<UserLoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-        </Routes>
-      </div>
-      <FooterComponents />
+      {!hideNavAndFooter && <NavbarComponents />}
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/kelas" element={<Kelas />} />
+        <Route path="/testimoni" element={<TestimoniPage />} />
+        <Route path="/faq" element={<FaqPage />} />
+        <Route path="/syaratketen" element={<SyaratKetenPage />} />
+        <Route path="/login" element={<UserLoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+      </Routes>
+      {!hideNavAndFooter && <FooterComponents />}
     </div>
   )
 }

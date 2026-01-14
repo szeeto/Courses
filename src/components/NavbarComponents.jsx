@@ -28,7 +28,7 @@ const NavbarComponents = () => {
   }
 
   return (
-    <Navbar expand="lg" className={changeColor ? 'color-active' : ''}>
+    <Navbar expand="lg" fixed="top" className={changeColor ? 'color-active' : ''}>
       <Container>
         <Navbar.Brand className='fs-3 fw-bold' href="#home">Ngoding.</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />

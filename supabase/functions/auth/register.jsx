@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
       // Hash password using Web Crypto API
       const encoder = new TextEncoder()
       const passwordData = encoder.encode(password)
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+      const hashBuffer = await crypto.subtle.digest('SHA-256', passwordData)
       const hashArray = Array.from(new Uint8Array(hashBuffer))
       const hashedPassword = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
 
