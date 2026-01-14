@@ -104,6 +104,23 @@ export function useSupabaseAuth() {
     return { data, error }
   }, [])
 
+  // Admin sign in function
+  const signInAdmin = useCallback(async (email, password) => {
+    const { data, error } = await edgeFunctionCall('auth-admin-login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    })
+
+    if (data && !error) {
+      setUser(data.user)
+      setSession({ access_token: data.token })
+      localStorage.setItem('authToken', data.token)
+      localStorage.setItem('user', JSON.stringify(data.user))
+    }
+
+    return { data, error }
+  }, [])
+
   // Google sign in function
   const signInWithGoogle = useCallback(async (idToken) => {
     const { data, error } = await apiCall('/auth/google', {
@@ -165,6 +182,7 @@ export function useSupabaseAuth() {
     error,
     signUp,
     signIn,
+    signInAdmin,
     signInWithGoogle,
     signOut,
     resetPassword,

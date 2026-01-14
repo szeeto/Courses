@@ -41,6 +41,7 @@ Deno.serve(async (req) => {
         .from('users')
         .select('*')
         .eq('email', email)
+        .eq('role', 'admin')
         .single()
 
       if (error || !user) {
@@ -86,9 +87,14 @@ Deno.serve(async (req) => {
         exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60) // 24 hours
       }
 
+      // Base64url encode function
+      const base64urlEncode = (str) => {
+        return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
+      }
+
       // Simple JWT implementation for Deno
-      const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }))
-      const payloadB64 = btoa(JSON.stringify(payload))
+      const header = base64urlEncode(JSON.stringify({ alg: 'HS256', typ: 'JWT' }))
+      const payloadB64 = base64urlEncode(JSON.stringify(payload))
       const message = `${header}.${payloadB64}`
 
       const key = await crypto.subtle.importKey(
@@ -100,14 +106,14 @@ Deno.serve(async (req) => {
       )
 
       const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(message))
-      const signatureB64 = btoa(String.fromCharCode(...new Uint8Array(signature)))
+      const signatureB64 = base64urlEncode(String.fromCharCode(...new Uint8Array(signature)))
 
       const token = `${message}.${signatureB64}`
 
       return new Response(
         JSON.stringify({
           success: true,
-          message: 'Login successful',
+          message: 'Admin login successful',
           user: {
             id: user.id,
             name: user.name,
@@ -132,7 +138,7 @@ Deno.serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Auth login error:', error)
+    console.error('Auth admin login error:', error)
     return new Response(
       JSON.stringify({
         success: false,

@@ -1,5 +1,5 @@
 import { Navbar, Container, Nav } from 'react-bootstrap'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { navLinks } from "../data/index.js"
 import { useState, useEffect } from 'react'
 import { useSupabaseAuth } from '../hooks/useSupabaseAuth'
@@ -7,6 +7,7 @@ import { useSupabaseAuth } from '../hooks/useSupabaseAuth'
 const NavbarComponents = () => {
   const [changeColor, setChangeColor] = useState(false)
   const { user, isLoggedIn, signOut } = useSupabaseAuth()
+  const navigate = useNavigate()
 
   const changeBackgroundColor = () => {
     if (window.scrollY > 10) {
@@ -25,6 +26,7 @@ const NavbarComponents = () => {
 
   const handleLogout = async () => {
     await signOut()
+    navigate('/login')
   }
 
   return (
@@ -47,9 +49,9 @@ const NavbarComponents = () => {
           <div className='text-center d-flex gap-2 justify-content-center'>
             {isLoggedIn ? (
               <div className="d-flex align-items-center gap-2">
-                <span className="text-light">Halo, {user?.name || 'User'}</span>
+                <span className="text-dark">Halo, {user?.name || 'User'}</span>
                 <button
-                  className="btn btn-outline-light rounded-1"
+                  className="btn btn-outline-dark rounded-1"
                   onClick={handleLogout}
                 >
                   Logout
